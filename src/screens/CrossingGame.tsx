@@ -168,7 +168,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
       setTargetTime(market.close_time);
     }
   }, [market?.close_time, setTargetTime]);
-
+    
   return (
     <View style={{display: navTabHomeName == 'Tab4' ? 'flex' : 'none'}}>
       <ScrollView
