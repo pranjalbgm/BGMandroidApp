@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "217346846762",
+    "project_id": "bgm-game",
+    "storage_bucket": "bgm-game.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:217346846762:android:249b17b29ea9f081f45353",
+        "android_client_info": {
+          "package_name": "com.babajiclubs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEaTddPQmKqakL-VQ5Kg2MKYzxKGUJxk0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
