@@ -36,32 +36,57 @@ export const useGameSettings = () => {
 //   });
 // };
 
+// export const usePlayerData = () => {
+//   return useMutation({
+//     mutationKey: ['PlayerData'],
+//     mutationFn: async ({mobile}) => {
+   
+//       try {
+//         if(mobile){
+//           const response = await apiClient.get(`player-profile/${mobile}/`);
+
+//           console.log("API Response:", response.data);
+//           return response.data;
+//         }
+//         else{
+
+//         }
+//       } catch (error) {
+//         console.error("Error in usePlayerData:", error);
+//         // console.log(error)
+//         throw error;
+//       }
+//     }
+//  ,
+//     onSuccess: data => {
+//       // console.log("Mutation successful!", data);
+//     },
+//     onError: error => {
+//       // console.error("Mutation failed!", error);
+//     },
+//   });
+// };
+
+
 export const usePlayerData = () => {
   return useMutation({
     mutationKey: ['PlayerData'],
-    mutationFn: async ({mobile}) => {
-   
+    mutationFn: async ({ mobile }) => {
+      const controller = new AbortController();
       try {
-        if(mobile){
-          const response = await apiClient.get(`player-profile/${mobile}/`);
-          // console.log("API Response:", response.data);
+        if (mobile) {
+          const response = await apiClient.get(`player-profile/${mobile}/`, {
+            signal: controller.signal,
+          });
           return response.data;
         }
-        else{
-
-        }
       } catch (error) {
-        console.error("Error in usePlayerData:", error);
-        // console.log(error)
+        if (error.name === 'CanceledError') {
+          console.warn("Request was canceled:", error.message);
+          return; // Ignore canceled requests
+        }
         throw error;
       }
-    }
- ,
-    onSuccess: data => {
-      // console.log("Mutation successful!", data);
-    },
-    onError: error => {
-      // console.error("Mutation failed!", error);
     },
   });
 };
@@ -69,27 +94,26 @@ export const usePlayerData = () => {
 
 export const usePlayerDataFetch = (mobile) => {
   return useQuery({
-    queryKey: ["PlayerData", mobile], // Unique query key per mobile
+    queryKey: ["PlayerData", mobile], 
     queryFn: async () => {
+      if (!mobile) {
+        return null;
+      }
       try {
-        console.log("mobile value ------------))))",mobile)
-        if(mobile){
-          const response = await apiClient.get(`player-profile/${mobile}/`);
-
-          console.log("API Response:", response.data);
-          return response.data;
-        }
+        const response = await apiClient.get(`player-profile/${mobile}/`);
+        return response.data;
       } catch (error) {
         console.error("Error in usePlayerData:", error);
-        throw error;
+        throw error; 
       }
     },
-    onSuccess: data => {
-      console.log("Mutation successful!", data);
+    onSuccess: (data) => {
+      console.log("Player data fetched successfully!", data);
     },
-    onError: error => {
-      console.error("Mutation failed!", error);
+    onError: (error) => {
+      console.error("Error fetching player data!", error);
     },
-    enabled: !!mobile,
+    enabled: !!mobile, 
   });
 };
+

@@ -68,10 +68,15 @@ interface AppStyles {
   callBtn:TextStyle;
   callBtnIcon:TextStyle;
   modalContent:TextStyle;
+  jodiscontainer:ViewStyle;
   // logoImage:ImageStyle;
 }
 
 const appStyles: AppStyles = {
+  jodiscontainer:{
+    height:"100%",
+    width:"100%"
+  },
   panCard:{
     width:300
   },
@@ -755,7 +760,7 @@ const appStyles: AppStyles = {
   },
 
   nestedScrollView: {
-    maxHeight: 490, // Example height, adjust as needed
+    maxHeight: 800, // Example height, adjust as needed
   },
   innerContent: {
     // Styles for inner content

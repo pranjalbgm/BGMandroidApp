@@ -49,9 +49,12 @@ const HelpScreen = ({navigation}: any) => {
   };
 
   const videos =
-    help && help.video
-      ? [1, 2, 3, 4, 5].map(num => help?.video[`video${num}`])
-      : [];
+  help && help.video
+    ? [1, 2, 3, 4, 5].map((num, index) => ({
+        key: `video-${num}`,  
+        url: help?.video[`video${num}`],
+      }))
+    : [];
 
   const video = require('../images/bbjDeposit.mp4');
 
@@ -113,12 +116,10 @@ const HelpScreen = ({navigation}: any) => {
 
                     {videos.length > 0 ? (
                       <ScrollView>
-                        {videos?.map(
-                          vid =>
+                        {videos?.map(vid =>
                             vid && (
-                              <View style={{height: 200}}>
+                              <View style={{height: 200}} key={vid.key}>
                                 <Video
-                                  key={vid}
                                   ref={videoRef}
                                   controls={true}
                                   paused={true}

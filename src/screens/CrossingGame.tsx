@@ -102,25 +102,45 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
   }, [placeBet.isSuccess, placeBet.isError, placeBet.isPending]);
 
   const onDone = () => {
-    // (crossingFirstInput && crossingSecondInput && crossingPoints) && setCrossingJodis(prev =>
-    //   buildCrossingJodi(crossingFirstInput, crossingSecondInput)
-    // )
-
-    if (!textOne || textTwo) {
-      Toast.show('Please enter same digit number in both field.', Toast.LONG);
-    } else if (!textThree) {
-      Toast.show('Please enter number points.', Toast.LONG);
-    } else {
-      setCrossingJodis(prev =>
-        buildCrossingJodi(crossingFirstInput, crossingSecondInput),
-      );
+    // Validation for digit count
+    if (crossingFirstInput.length <= 2) {
+      Toast.show('Number digit should be more than 3 digits.', Toast.LONG);
+      return;
     }
+  
+    // Validation for consecutive digits
+    const hasConsecutiveDigits = (number) => {
+      for (let i = 0; i < number.length - 1; i++) {
+        if (number[i] === number[i + 1]) {
+          return true;
+        }
+      }
+      return false;
+    };
+  
+    if (hasConsecutiveDigits(crossingFirstInput)) {
+      Toast.show('The number should not have consecutive identical digits.', Toast.LONG);
+      return;
+    }
+  
+    // // Validate that first and second input are the same
+    // if (!textOne || !textTwo || textOne !== textTwo) {
+    //   Toast.show('Please enter the same digit number in both fields.', Toast.LONG);
+    //   return;
+    // }
+  
+    // Validate points are entered
+    if (!textThree) {
+      Toast.show('Please enter number points.', Toast.LONG);
+      return;
+    }
+  
+    // If all validations pass, set the crossing jodis
+    setCrossingJodis(prev => 
+      buildCrossingJodi(crossingFirstInput, crossingSecondInput)
+    );
   };
-  // crossingPoints
-  // const invalidBet = apiData.find((bet) => {
-  //   const points = parseInt(bet.points.toString(), 10);
-  //   return isNaN(points) || points < market?.minimum || points > market?.maximum;
-  // });
+
 
   const handleSubmit = () => {
     const pointsValue = crossingPoints;
@@ -170,11 +190,11 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
   }, [market?.close_time, setTargetTime]);
     
   return (
-    <View style={{display: navTabHomeName == 'Tab4' ? 'flex' : 'none'}}>
+    <View style={{display: navTabHomeName == 'Tab4' ? 'flex' : 'none',}}>
       <ScrollView
         nestedScrollEnabled
-        contentContainerStyle={styles.nestedScrollView}>
-        <View style={styles.innerContent}>
+        contentContainerStyle={{maxHeight: 600}}>
+        <View style={{height:"100%"}}>
           <View
             style={{
               display: 'flex',
@@ -295,8 +315,8 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
           </View>
 
           {crossingJodis && (
-            <ScrollView horizontal>
-              <View>
+            <ScrollView style={{ marginBottom:10}}>
+              <View  >
                 <View
                   style={{
                     backgroundColor: '#000000',
@@ -409,7 +429,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
                   </View>
                 ))}
               </View>
-            </ScrollView>
+               </ScrollView>
           )}
         </View>
       </ScrollView>
@@ -427,26 +447,6 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
 
       {crossingJodis && (
         <View style={styles.footerFix}>
-          {/* <TouchableOpacity
-          disabled={placeBet.isPending || placeBet.isSuccess}
-          style={styles.Btn}
-          onPress={() => {
-            if (sufficientBalance) {
-              handleSubmit(); // Call the function
-            } else {
-              setShowNoBalance(!showNoBalance);
-            }
-          }}
-          // onPress={() => {
-          //   return sufficientBalance
-          //     ? handleSubmit
-          //     : setShowNoBalance(!showNoBalance);
-          // }}
-          >
-
-          <Text style={styles.primaryBtn}>Play</Text>
-          <View style={styles.bottomBorder} />
-        </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.Btn}
             onPress={() => {
@@ -469,7 +469,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
             }}
             // disabled={isMarketClosed}
           >
-            <View style={styles.Btn}>
+            <View style={styles.CrossingBtn}>
               <Text style={styles.primaryBtn}>
                 {isMarketClosed ? 'Time Out' : 'Play'}
               </Text>
@@ -484,6 +484,9 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
 
 const styles = StyleSheet.create({
   ...appStyles,
+  CrossingBtn:{
+    // flex:1
+  },
 });
 
 export default CrossingGame;

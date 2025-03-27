@@ -71,6 +71,7 @@ const Navbar = ({
   // =========> Log Player OUT
   const handleLogout = async () => {
     await removeData('user');
+    await removeData('token');
     const userAfterRemoval = await getData('user');
     console.log('User after removal:', userAfterRemoval);
     navigation.navigate('MpinScreen');

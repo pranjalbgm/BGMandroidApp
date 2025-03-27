@@ -26,14 +26,14 @@ const LoginWithMpin = () => {
   const [loader, setLoader] = useState(false);
   //---------- Input Form End ----------//
 
-  useEffect(() => {
-    (async function checkUserSession() {
-      const user = await getData("user");
-      if (user) {
-        navigation.navigate('HomeScreen');
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async function checkUserSession() {
+  //     const user = await getData("user");
+  //     if (user) {
+  //       navigation.navigate('HomeScreen');
+  //     }
+  //   })();
+  // }, []);
 
   const handleLogin = async () => {
     if (!mobile || mobile.length !== 10) {
@@ -55,8 +55,10 @@ try{
     .then( (response) => {
      
       if (response?.status === 200) {
-        console.log("get till here", response);
-         storeData({ key: 'user', data: { mobile } });
+        storeData({ key: 'user', data: { mobile } });
+        const tokenvalue = response?.data?.jwt_token 
+        console.log("get till here -----------------", tokenvalue);
+        storeData({ key: 'token', data: { tokenvalue } });
         navigation.reset({ index: 0, routes: [{ name: 'HomeScreen' }] });
       } else {
         Toast.show(response?.data?.message || 'Invalid credentials.', Toast.LONG);

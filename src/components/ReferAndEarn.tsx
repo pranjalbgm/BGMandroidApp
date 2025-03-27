@@ -36,7 +36,7 @@ const ReferAndEarn = ({visible, setModalVisibleRefer}) => {
         '\nLife Time Earning \n24x7 Live Chat Support \nWithdrawal Via UPI/Bank \n👇👇 ' +
         '\nRegister Now, on \nwww.thebgmgame.com ' +
         '\nMy refer code is ' +
-        playerInfo.data.refer_code +
+        playerInfo?.data?.refer_code +
         '.';
 
       setMessage(textMessage);

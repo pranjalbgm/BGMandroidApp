@@ -178,9 +178,9 @@ const ManualGame = ({navTabHomeName, market, apiData, screenType}: any) => {
                   <View style={{width: '60%'}}>
                     <Text style={styles.headerCell}>Jodi</Text>
 
-                    {manualFields.map(currentManualField => (
+                    {manualFields.map((currentManualField,index) => (
                       <View
-                        key={currentManualField}
+                        key={index}
                         style={{
                           flexDirection: 'row',
                           display: 'flex',
@@ -188,8 +188,8 @@ const ManualGame = ({navTabHomeName, market, apiData, screenType}: any) => {
                           // borderWidth:1,
                           // padding: 5,
                         }}>
-                        {[1, 2, 3, 4, 5].map(numberIndex => (
-                          <View style={styles.innerCell}>
+                        {[1, 2, 3, 4, 5].map((numberIndex,index) => (
+                          <View style={styles.innerCell}   key={index}>
                             <TextInput
                               style={styles.inputmanual}
                               maxLength={2}
@@ -229,12 +229,12 @@ const ManualGame = ({navTabHomeName, market, apiData, screenType}: any) => {
                       <Text style={{color: '#DE7A2D'}}>Point</Text>
                     </Text>
 
-                    {manualFields.map(currentManualField => (
+                    {manualFields.map((currentManualField,index) => (
                       <TextInput
                         onChangeText={text =>
                           handlePointsChange(currentManualField, text)
                         }
-                        key={currentManualField}
+                        key={index}
                         id={currentManualField + 'points'}
                         style={styles.innerCell}
                         maxLength={
@@ -249,9 +249,9 @@ const ManualGame = ({navTabHomeName, market, apiData, screenType}: any) => {
                       <Text style={{color: '#DE7A2D'}}>Total</Text>
                     </Text>
 
-                    {manualFields.map(currentManualField => (
+                    {manualFields.map((currentManualField,index) => (
                       <Text
-                        key={currentManualField}
+                        key={index}
                         id={currentManualField + 'total'}
                         style={{...styles.innerCell}}>
                         {calculateTotalPoints(currentManualField)}
