@@ -9,7 +9,7 @@ import {fetchMobile} from './useWallet';
 const postMobileNumber = async data => {
   try {
     const response = await apiClient.post('create-deposits/', data);
-    // console.log("API Response: ", response.data);
+    console.log("API Response: -----------------------", response.data);
     return response.data; // Return only the data part
   } catch (error) {
     if (error.response) {

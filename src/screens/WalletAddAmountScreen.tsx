@@ -497,7 +497,7 @@ useEffect(() => {
 
     if (manualTrancId && manualTrancId.length === 12) {
       try {
-        await addPoints.mutateAsync({
+        const response = await addPoints.mutateAsync({
           amount: addPointsAmount,
           admin: manualAccountText.admin,
           transaction_id: manualTrancId,
@@ -520,10 +520,12 @@ useEffect(() => {
 
         // On success, show the success toast
 
-        if (addPoints.isSuccess) {
-          console.log('%%%%%%%%%%-------->', addPoints.isSuccess, addPoints);
+        if (response) {
+          console.log('%%%%%%%%%%-------->', addPoints.isSuccess, addPoints,response.success);
           Toast.show('Deposit added successfully', Toast.LONG);
           setAddPaymnetMerchantId(false);
+          refetch();
+          refetchWallet();
         } else if (addPoints.isError) {
           console.log('%%%%%%%%%%-------->', addPoints.isError);
           Toast.show('Deposit not added ', Toast.LONG);

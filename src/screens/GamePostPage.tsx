@@ -36,6 +36,7 @@ const GamePostPage = () => {
 
   const [mobile, setMobile] = useState('');
   const [messages, setMessages] = useState([]);
+  console.log("------------------------------------------>",messages)
   const [message, setMessage] = useState('');
   const [loader, setLoader] = useState(false);
 
@@ -116,17 +117,36 @@ const GamePostPage = () => {
             <Text>Loading...</Text>
           ) : gamePosting?.length > 0 ? (
             messages.map((message, index) => (
-              <View style={styles.container}>
+              <View style={styles.container} key={index}>
       <Text style={styles.marketText}>
         <Text style={styles.bold}>{message?.market}</Text>
       </Text>
-
+      <View>
+                            <Text>
+                              <Text>From -</Text> {message.dateFrom} &nbsp;
+                            </Text>
+                            <Text>
+                              <Text>To -</Text> {message.dateTo}
+                            </Text>
+                          </View>
       <View>
         <View style={styles.row}>
           <Text style={styles.bold}>Tricks from - </Text>
           <Text>{message?.tricksfrom}</Text>
         </View>
-        <Text>{message?.tricks}</Text>
+        <View>{message?.tricks?.map((trick, index) => (
+                        <Text
+                          key={index}
+                          style={{
+                            display: "flex",
+                            flexWrap: "nowrap",
+                            justifyContent: "flex-end",
+                          }}
+                          
+                        >
+                          {trick}
+                        </Text>
+                      ))}</View>
       </View>
 
       <View style={styles.valuesContainer}>

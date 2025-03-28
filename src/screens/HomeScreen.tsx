@@ -44,6 +44,7 @@ import { getButtonText } from '../utils/KycUtils';
 interface Market {
   id: number;
   market: string;
+  market_status:string;
   open_time: string;
   close_time: string;
   result_time: string;
@@ -77,7 +78,8 @@ interface MarketItemProps {
 
 // Market Display Component
 const MarketItem: React.FC<MarketItemProps> = React.memo(({ market, onPlayClick }) => {
-  const isMarketActive = isTimeNotPassed(market.close_time) && !isTimeNotPassed(market.open_time);
+  const activemarket = market?.market_status !== "Closed"
+  const isMarketActive = activemarket
   
   return (
     <TouchableOpacity 
@@ -241,6 +243,8 @@ const HomeScreen: React.FC = () => {
             contentContainerStyle={styles.scrollViewContent}
             showsVerticalScrollIndicator={false}
           >
+            <TouchableWithoutFeedback>
+              <View>
             <WalletPoints />
             {renderQuickActions()}
 
@@ -288,7 +292,7 @@ const HomeScreen: React.FC = () => {
                 style={styles.Btn}
                 onPress={() =>
                   Linking.openURL(
-                    'https://www.babajiisatta.com/',
+                    'https://bgmgame.in/',
                   ).catch(err =>
                     console.error("Couldn't load page", err)
                   )
@@ -324,6 +328,8 @@ const HomeScreen: React.FC = () => {
 
 
             <WelcomeModal visible={false} onClose={() => {}} />
+            </View>
+              </TouchableWithoutFeedback>
           </ScrollView>
         </View>
 

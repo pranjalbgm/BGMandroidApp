@@ -4,8 +4,10 @@ import {useQuery} from '@tanstack/react-query';
 
 const fetchDecemberMonthResult = params =>
   adminApiClient
-    .get('result-list/', {params})
-    .then(res => res.data)
+    .get('result-list-live-result/', {params})
+    .then(res => {
+      console.log("--------------------------------->>>>>>>>>>><<<<<<<<<>>>>>>>",res)
+      return res.data})
     .catch(error => {
       console.error('Error fetching December month results:', error); // Log the error
       throw error; // Rethrow the error so that useQuery can catch it
@@ -32,7 +34,7 @@ const useDecemberMonthResult = ({date = ''} = {}) => {
   });
 
   // If the data structure is nested in "results", we access it like this
-  const result = resultData?.results || [];
+  const result = resultData || [];
 
   // Check for errors in the hook's error property
   if (error) {

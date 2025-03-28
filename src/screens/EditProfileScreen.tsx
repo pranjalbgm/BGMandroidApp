@@ -21,7 +21,7 @@ import appStyles from '../styles/appStyles';
 import useEditProfile from '../hooks/useEditProfile';
 import usePlayerProfile from '../hooks/usePlayerProfile';
 import useWalletAmount from '../hooks/useWalletAmount';
-import {usePlayerData} from '../hooks/useHome';
+import {usePlayerData, usePlayerDataFetch} from '../hooks/useHome';
 import useWallet, {fetchMobile} from '../hooks/useWallet';
 import {format} from 'date-fns';
 import DocumentPicker from 'react-native-document-picker';
@@ -39,6 +39,7 @@ const EditProfileScreen = () => {
   const [errors, setErrors] = useState({});
   const [imageData, setimageData] = useState({});
   const [loader, setLoader] = useState(false);
+  const {refetch}= usePlayerDataFetch(mobile);
 
   const handleFieldClick = fieldName => {
     setErrors(prevErrors => ({
@@ -91,6 +92,18 @@ const EditProfileScreen = () => {
     }
   };
 
+   useEffect(() => {
+          const initializeMobile = async () => {
+            const fetchedMobile = await fetchMobile(setMobile);
+            if (fetchedMobile) {
+              // playerInfo.mutate({ mobile: fetchedMobile });
+              refetch(fetchedMobile)
+            }
+          };
+          initializeMobile();
+        }, []);
+  
+
   const validateName = name => {
     if (!name.trim()) {
       setErrors(prevErrors => ({...prevErrors, name: 'Name cannot be empty.'}));
@@ -103,7 +116,8 @@ const EditProfileScreen = () => {
   const {editProfile} = useEditProfile();
   const {playerDetails} = usePlayerProfile();
   const {wallet} = useWallet();
-  const playerData = usePlayerData();
+    const playerData = usePlayerDataFetch(mobile);
+    console.log("playerdata----------",playerData)
 
   // console.log(playerData)
 
@@ -117,6 +131,8 @@ const EditProfileScreen = () => {
   const [bank, setBank] = useState('');
   const [account_number, setAccountNumber] = useState('');
   const [ifsc, setIfsc] = useState('');
+
+  
 
   // const actions: {
   //   title: "Select Image",
@@ -164,72 +180,61 @@ const EditProfileScreen = () => {
   };
 
   const submitInfo = async () => {
-    console.log('error');
+    console.log('Starting KYC submission...');
+  
     try {
-      const imageUri = imageData.uri;
-      const imageName = imageData.name;
-      const imageType = imageData.type;
-      console.log(imageData);
-
+      if (!imageData) {
+        console.error('No image data found');
+        return;
+      }
+  
+      const imageUri = imageData?.uri;
+      const imageName = imageData?.name;
+      const imageType = imageData?.type;
+  
       const formData = new FormData();
-
-      formData.append('email', email);
       formData.append('dob', selectedDate);
-
-      if (imageData.uri) {
+  
+      if (imageUri) {
         formData.append('image', {
           uri: imageUri,
           type: imageType,
           name: imageName,
         });
       }
-
-      console.log(formData);
+  
+      console.log('Form Data:', formData);
       setLoader(true);
-
-      try {
-        const response = await axios.put(
-          `${BaseURLCLUB}/player-update/${mobile}/`,
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Accept: 'application/json',
-            },
-          },
-        );
-
-        if (!response.status == 200) {
-          const errorData = await response;
-          console.log('Error Response:', errorData.data.error);
-          Toast.show(errorData.data.error, Toast.LONG);
-        } else {
-          console.log('Profile updated successfully');
-          Toast.show('Profile updated successfully', Toast.LONG);
-        }
-        console.log('Data :- ', response);
-
-        setLoader(false);
-      } catch (error) {
-        console.log(error);
-        setLoader(false);
-        if (error.response) {
-          // Server responded with a status other than 200 range
-          console.log('Error Response:', error.response.data);
-          Toast.show(error.response.data.error, Toast.LONG);
-        } else if (error.request) {
-          // Request was made but no response received
-          console.log('Error Request:', error.request);
-        } else {
-          // Something else happened in setting up the request
-          console.log('Error Message:', error.message);
-        }
-      }
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log('User canceled the picker');
+  
+      const response = await apiClient.put(`/player-update/${mobile}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json',
+        },
+      });
+  
+      if (response.status !== 200) {
+        console.log('Error Response:', response.data.error);
+        Toast.show(response.data.error, Toast.LONG);
       } else {
-        console.log('Document Picker Error:', err);
+        console.log('Profile updated successfully');
+        Toast.show('Profile updated successfully', Toast.LONG);
+      }
+  
+      console.log('Response Data:', response);
+      setLoader(false);
+  
+    } catch (error) {
+      console.log('Error:', error);
+      setLoader(false);
+  
+      if (error.response) {
+        console.log('Error Response:', error.response.data);
+        Toast.show(error.response.data.error || 'Something went wrong', Toast.LONG);
+      } else if (error.request) {
+        console.log('Error Request:', error.request);
+      } else {
+        console.log('Error Message:', error.message);
       }
     }
   };
@@ -350,6 +355,7 @@ const EditProfileScreen = () => {
                   defaultValue={playerData?.data?.email}
                   placeholder="Enter Your Email"
                   style={{color: COLORS.black}}
+                  editable={false}
                 />
               </View>
             </View>

@@ -28,7 +28,7 @@ import {
 } from '../hooks/useAddKYC';
 import { usePlayerData } from '../hooks/useHome';
 import { fetchMobile } from '../hooks/useWallet';
-import { BaseURLCLUB } from '../constants/api-client';
+import apiClient, { BaseURLCLUB } from '../constants/api-client';
 import { showAlert } from './Alert';
 import { pickDocument } from '../components/KycComponent/pickDocument '; // Create this utility function
 import appStyles from '../styles/appStyles';
@@ -106,35 +106,32 @@ const KycModal: React.FC<KycModalProps> = ({
   const onKycSubmit = async () => {
     setLoader(true);
     setModalVisible(false);
-
+  
     const submitFormData = new FormData();
     submitFormData.append('mobile', mobile);
     submitFormData.append('permanent_address', formData.permanent_address);
     submitFormData.append('pincode', formData.pincode);
     submitFormData.append('kyc', 'yes');
     submitFormData.append('dob', formData.dob);
+    
     if (formData.gst_no) {
       submitFormData.append('gst_no', formData.gst_no);
     }
-
+  
     try {
-      const response = await fetch(`${BaseURLCLUB}/player-update/${mobile}/`, {
-        method: 'PUT',
+      const response = await apiClient.put(`/player-update/${mobile}/`, submitFormData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
-        body: submitFormData,
       });
-
-      if (response.ok) {
+  
+      if (response.status === 200) {
         showAlert('Submit KYC Successfully');
-        const responseData = await response.json();
-        fetchMobile(() => {}).then(() => playerData.mutate({mobile}));
+        fetchMobile(() => {}).then(() => playerData.mutate({ mobile }));
       } else {
-        const errorData = await response.json();
+        console.error('KYC Submit Error:', response.data);
         showAlert('Submit KYC Unsuccessfully');
-        console.error('KYC Submit Error:', errorData);
       }
     } catch (error) {
       console.error('KYC Submit Error:', error);

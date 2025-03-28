@@ -42,7 +42,7 @@ const LoginWithMpin = () => {
     }
 
     if (!mpin || mpin.length !== 6) {
-      Toast.show('Please enter a valid 4-digit MPIN.', Toast.LONG);
+      Toast.show('Please enter a valid 6-digit MPIN.', Toast.LONG);
       return;
     }
 
@@ -50,7 +50,6 @@ const LoginWithMpin = () => {
 
     const params = { mobile:mobile, mpin: mpin };
 try{
-    axios
     NodeapiClient.post('/login', params)
     .then( (response) => {
      

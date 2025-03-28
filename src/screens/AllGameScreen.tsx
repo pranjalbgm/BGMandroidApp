@@ -152,23 +152,14 @@ const playerInfo = usePlayerDataFetch(mobile);
                                 key={market.id}
                                 style={{
                                   backgroundColor: '#E1EFE6',
-                                  padding:
-                                    isTimeNotPassed(market.close_time) &&
-                                    !isTimeNotPassed(market.open_time)
-                                      ? 20
-                                      : 20,
+                                  padding:20,
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'space-between',
                                   flexDirection: 'row',
-                                  marginBottom:
-                                    isTimeNotPassed(market.close_time) &&
-                                    !isTimeNotPassed(market.open_time)
-                                      ? 10
-                                      : 10,
+                                  marginBottom:10,
                                 }}>
-                                {isTimeNotPassed(market.close_time) &&
-                                !isTimeNotPassed(market.open_time) ? (
+                                {market.market_status !== "Closed" ? (
                                   <>
                                     <View>
                                       <Text

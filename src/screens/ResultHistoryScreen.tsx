@@ -164,7 +164,7 @@ const ResultHistoryScreen = () => {
         <TouchableOpacity
           style={{...styles.Btn, marginVertical: 20, marginHorizontal: 10}}
           onPress={() =>
-            Linking.openURL('https://www.babajiisatta.com/').catch(err =>
+            Linking.openURL('https://bgmgame.in/').catch(err =>
               console.error("Couldn't load page", err),
             )
           }>

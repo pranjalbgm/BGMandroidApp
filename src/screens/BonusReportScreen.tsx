@@ -20,6 +20,7 @@ import {usePlayerData} from '../hooks/useHome';
 import useReferedBonusList from '../hooks/useBonusReportList';
 import NavFooter from '../components/NavFooter';
 import HeaderThree from '../components/HeaderThree';
+import useApprovedBonusList from '../hooks/useApprovedBonusList';
 
 type BonusItem = {
   mobile: string;
@@ -50,16 +51,29 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
   const [isMenuVisible, setMenuVisibility] = useState<boolean>(false);
   const [mobileNumber, setMobileNumber] = useState<string | null>(null);
   const [loader, setLoader] = useState<boolean>(false);
+  const [isApprovedView, setIsApprovedView] = useState<boolean>(false);
+  
 
   const playerData = usePlayerData();
-  const {bonusOn, isLoading} = useReferedBonusList({
-    parent_mobile: mobileNumber,
+  const { 
+    bonusOn: pendingBonusData, 
+    isLoading: isPendingLoading 
+  } = useReferedBonusList({
+    user_mobile: "8441067845", 
+    status: "Pending"
   });
-  // console.warn("======>",bonusOn)
 
-  // useEffect(() => {
-  //     fetchMobile(setMobileNumber).then(mobile => playerData.mutate({mobile}));
-  // }, [mobileNumber]);
+  const { 
+    bonusOn: approvedBonusData, 
+    isLoading: isApprovedLoading 
+  } = useApprovedBonusList({
+    mobile: mobileNumber
+  });
+
+  // Combine loading states and data
+  const bonusData = isApprovedView ? approvedBonusData : pendingBonusData;
+  const isLoading = isApprovedView ? isApprovedLoading : isPendingLoading;
+// console.log("--------------->>>>>>>>><<<<<<<<<<<<<<<<>>>>>>>>>>>>>>",bonusData)
   useEffect(() => {
       fetchMobile(setMobileNumber);
       console.log("this is bonus report ----------------------------true")
@@ -78,8 +92,14 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
     parentMobile: string | null,
     childMobile: string,
   ) => {
-    navigation.navigate('BonusChildDetails', {parentMobile, childMobile});
+    navigation.navigate('BonusChildDetails');
   };
+
+  const handleToggleBonusView = () => {
+    // Toggle between Pending and Approved views
+    setIsApprovedView(prev => !prev);
+  };
+
 
   return (
     <TouchableWithoutFeedback onPress={() => setMenuVisibility(false)}>
@@ -89,57 +109,27 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
 
           <View style={{padding: 20}}>
             <Text
-              style={{color: '#000000', paddingBottom: 15, fontWeight: 400}}>
-              Total Commission:
-              <Text> {totalCommission} </Text>
+              style={
+                styles.tips 
+              }>
+             आप अपने REFERAL CODE से जितने भी खिलाड़ी जोड़ोगे, उनकी खेली हुई गेम का आपको 10 परसेंट मिलेगा। और वो जितने लोगों को जोड़ेंगे अपने REFERAL CODE से, उसका भी आपको 2 से 5 परसेंट मिलेगा। यह ऑफर केवल 3 महीनों के लिए मान्य है।
             </Text>
-            <Text
-              style={{color: '#000000', paddingBottom: 15, fontWeight: 400}}>
-              Remaining Commission:
-              <Text>{bonusReport && bonusReport[0]?.closing_balance} </Text>
+          <View>
+            <Text style={styles.chatsupportdiv}>
+            ⚠️ Chat SUPPORT💥 के ज़रिए Admin से संपर्क करें और अपना Bonus Commission ON करवाएं, ताकि आप अपना रेफरल BONUS Commission बिना किसी रुकावट के आसानी से प्राप्त कर सकें। जब तक आप इसे ON नहीं करवाएंगे, तब तक आपका BOnus Commission मिलना शुरू नहीं होगा। ⚠️
             </Text>
-            <Text
-              style={{
-                color: '#000000',
-                paddingBottom: 15,
-                fontWeight: '500',
-                lineHeight: 24,
-              }}>
-              Enter Redeeem Amount (Min - 50 And
-              <Text>{'\n'}</Text>
-              Max- 2000 Can Withdraw)
-            </Text>
-            <View
-              style={{
-                marginBottom: 15,
-                flexDirection: 'row',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}>
-              <View
-                style={{
-                  backgroundColor: '#ECECEC',
-                  paddingHorizontal: 15,
-                  width: '70%',
-                }}>
-                <TextInput
-                  onChangeText={setTextInput1}
-                  value={textInput1}
-                  placeholder="Enter Amount"
-                  keyboardType="numeric"
-                />
-              </View>
-              <View
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <TouchableOpacity onPress={onSubmit} style={styles.Btn}>
-                  <Text style={styles.secondaryBtn}>Submit</Text>
-                  <View style={styles.bottomBorder} />
-                </TouchableOpacity>
-              </View>
+          </View>
+
+
+            <View>
+              <Text 
+                style={styles.approvedBonusBtn} 
+                onPress={handleToggleBonusView}
+              >
+              {!isApprovedView 
+                  ? 'Click Here to check Approved Bonus →' 
+                  : 'Click Here to check Pending Bonus →'}
+              </Text>
             </View>
           </View>
           <View>
@@ -159,9 +149,10 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                       textAlign: 'left',
                       fontWeight: '500',
                       padding: 15,
-                      paddingHorizontal: 60,
+                      // paddingHorizontal: 60,
+                      minWidth: 15,
                     }}>
-                    Date
+                    Index
                   </Text>
                   <Text
                     style={{
@@ -169,8 +160,9 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                       textAlign: 'left',
                       fontWeight: '500',
                       padding: 15,
+                      minWidth: 45,
                     }}>
-                    Bet Amount
+                    Name
                   </Text>
                   <Text
                     style={{
@@ -178,8 +170,9 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                       textAlign: 'left',
                       fontWeight: '500',
                       padding: 15,
+                      minWidth: 45,
                     }}>
-                    Commission Recieved
+                    Mobile
                   </Text>
                   <Text
                     style={{
@@ -187,8 +180,9 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                       textAlign: 'left',
                       fontWeight: '500',
                       padding: 15,
+                      minWidth: 45,
                     }}>
-                    Commission Redeemed
+                    Commission
                   </Text>
                   <Text
                     style={{
@@ -196,13 +190,114 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                       textAlign: 'left',
                       fontWeight: '500',
                       padding: 15,
+                      minWidth: 45,
                     }}>
-                    Redeem Status
+                    Child Commission
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Game Played by Refer User (Level 1)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Win amount (Level 1)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Profit (Level 1)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    TTL Comm (Level 1)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Game Played by Refer User (Level 2)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Win amount (Level 2)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Profit (Level 2)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    TTL Comm (Level 2)
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 45,
+                    }}>
+                    Total Comm
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      textAlign: 'left',
+                      fontWeight: '500',
+                      padding: 15,
+                      minWidth: 25,
+                    }}>
+                    View
                   </Text>
                 </View>
 
-                {bonusReport?.length !== 0 ? (
-                  bonusReport?.map((bonus: any, index: number) => (
+                {bonusData?.length !== 0 ? (
+                  bonusData?.map((bonus: any, index: number) => (
                     <View
                       key={index}
                       style={{
@@ -220,7 +315,7 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                           color: '#000000',
                           fontWeight: '500',
                           padding: 15,
-                          minWidth: 145,
+                          minWidth: 15,
                         }}>
                         {index + 1}
                       </Text>
@@ -243,7 +338,17 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                           textAlign: 'center',
                           fontWeight: '500',
                           padding: 15,
-                          minWidth: 145,
+                          minWidth: 45,
+                        }}>
+                        {bonus.name}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 45,
                         }}>
                         {bonus.mobile}
                       </Text>
@@ -253,9 +358,29 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                           textAlign: 'center',
                           fontWeight: '500',
                           padding: 15,
-                          minWidth: 145,
+                          minWidth: 45,
                         }}>
-                        {bonus.commision_amount}
+                        {bonus.commission_count}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 45,
+                        }}>
+                        {bonus.child_commission_count}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 315,
+                        }}>
+                        {bonus.bet_amount}
                       </Text>
                       <Text
                         style={{
@@ -265,7 +390,7 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                           padding: 15,
                           minWidth: 145,
                         }}>
-                        {bonus.action_by}
+                        {bonus.refer_1_win_amount}
                       </Text>
                       <Text
                         style={{
@@ -275,22 +400,86 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
                           padding: 15,
                           minWidth: 145,
                         }}>
-                        {bonus.referral_level}
+                        {bonus.profit_by_player}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 145,
+                        }}>
+                        {bonus.refer_level_1_amount}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 345,
+                        }}>
+                        {bonus.bet_amount_2}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 145,
+                        }}>
+                        {bonus.refer_2_win_amount}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 145,
+                        }}>
+                        {bonus.profit_by_player_2}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 145,
+                        }}>
+                        {bonus.refer_level_2_amount}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#000000',
+                          textAlign: 'center',
+                          fontWeight: '500',
+                          padding: 15,
+                          minWidth: 145,
+                        }}>
+                        {bonus.total_commission}
                       </Text>
                       <TouchableOpacity
-                        style={styles.button}
+                        // style={styles.button}
                         onPress={() =>
                           handleViewDetails(mobileNumber, bonus.mobile)
                         }>
                         <Text
                           style={{
-                            color: '#000000',
+                            
                             textAlign: 'center',
                             fontWeight: '500',
-                            padding: 15,
-                            minWidth: 145,
+                            padding: 10,
+                            minWidth: 45,
+                            color: 'white',
+                            backgroundColor:"green",
+                            borderRadius:10,
+                           
                           }}>
-                          View Details
+                          View
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -361,36 +550,6 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
   );
 };
 
-type BonusTableRowProps = {
-  item: BonusItem;
-  parentMobile: string | null;
-};
-
-const BonusTableRow: React.FC<BonusTableRowProps> = ({item, parentMobile}) => {
-  const navigation = useNavigation();
-
-  const handleViewDetails = (
-    parentMobile: string | null,
-    childMobile: string,
-  ) => {
-    navigation.navigate('BonusChildDetails', {parentMobile, childMobile});
-  };
-
-  return (
-    <View style={styles.rowContainer}>
-      <Text style={styles.cell}>{item.mobile}</Text>
-      <Text style={styles.cell}>{item.commision_amount}</Text>
-      <Text style={styles.cell}>{item.action_by}</Text>
-      <Text style={styles.cell}>{item.referral_level}</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => handleViewDetails(parentMobile, item.mobile)}>
-        <Text style={styles.buttonText}>View Details</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -453,6 +612,26 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+  approvedBonusBtn:{
+    backgroundColor:"green",
+    color:"white",
+    padding:10,
+    borderRadius:10
+  },
+  chatsupportdiv:{
+    backgroundColor:"rgb(248, 215, 218)",
+    color:"rgb(114, 28, 36)",
+    padding:10,
+    borderRadius:10,
+    marginBottom:10
+  },
+  tips:{
+    backgroundColor:"rgb(248, 249, 250)",
+    color: '#000000',
+                paddingBottom: 15,
+                fontWeight: '500',
+                lineHeight: 24,
+  }
 });
 
 export default BonusReport;
