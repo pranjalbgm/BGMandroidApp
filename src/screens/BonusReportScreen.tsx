@@ -59,7 +59,7 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
     bonusOn: pendingBonusData, 
     isLoading: isPendingLoading 
   } = useReferedBonusList({
-    user_mobile: "8441067845", 
+    user_mobile: mobileNumber, 
     status: "Pending"
   });
 

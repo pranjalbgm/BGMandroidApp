@@ -69,7 +69,66 @@ interface AppStyles {
   callBtnIcon:TextStyle;
   modalContent:TextStyle;
   jodiscontainer:ViewStyle;
+  btn:ViewStyle;
+  forgotLink:ViewStyle;
   // logoImage:ImageStyle;
+
+  // game post ------------
+  innerHeader: ViewStyle;
+  backButton: ViewStyle;
+  backText: TextStyle;
+  headerTitle: TextStyle;
+  logo: ImageStyle;
+  mainContainer: ViewStyle;
+  scrollContent: ViewStyle;
+  pinnedChat: ViewStyle;
+  boxPinnedInner: ViewStyle;
+  boxInnerContainer: ViewStyle;
+  pinnedMessageHeader: ViewStyle;
+  postHost: ViewStyle;
+  pinnedByText: TextStyle;
+  postByText: TextStyle;
+  dateTimeContainer: ViewStyle;
+  dateText: TextStyle;
+  timeText: TextStyle;
+  boxses: ViewStyle;
+  boxInner: ViewStyle;
+  boxInnerWrapper: ViewStyle;
+  messageHeader: ViewStyle;
+  postContainer: ViewStyle;
+  postHostText: TextStyle;
+  nameText: TextStyle;
+  boxRightArea: ViewStyle;
+  marketNameText: TextStyle;
+  marketText: TextStyle;
+  tricksInfoContainer: ViewStyle;
+  tricksFromText: TextStyle;
+  boldText: TextStyle;
+  dateContainer: ViewStyle;
+  emojiReactions: ViewStyle;
+  reactionBtn: ViewStyle;
+  emojiText: TextStyle;
+  emojiCount: TextStyle;
+  messageTricks: ViewStyle;
+  trickText: TextStyle;
+  valuesContainer: ViewStyle;
+  valueRow: ViewStyle;
+  valueLabel: TextStyle;
+  emojiWrapper: ViewStyle;
+  predefinedEmojis: ViewStyle;
+  emojiBtn: ViewStyle;
+  emojiPickerIcon: ViewStyle;
+  dateTimeFooter: ViewStyle;
+  replyButton: ViewStyle;
+  replyText: TextStyle;
+  replyOptionsContainer: ViewStyle;
+  replyOption: ViewStyle;
+  replyOptionText: TextStyle;
+  replyCount: TextStyle;
+  noDataContainer: ViewStyle;
+  noDataText: TextStyle;
+  addPostButton: ViewStyle;
+  addPostText: TextStyle;
 }
 
 const appStyles: AppStyles = {
@@ -248,14 +307,9 @@ const appStyles: AppStyles = {
     backgroundColor: '#4CB050',
     borderRadius: 40,
     color: 'white',
-    // zIndex: 5,
-    // position: 'relative',
-    // minWidth: 100,
     fontWeight: '500',
-    // marginTop:180,
-    // width:'70%',
-    // left:40,
-    // top:90
+    minWidth: 100,
+
   },
   secondaryBtn: {
     textAlign: 'center',
@@ -949,7 +1003,275 @@ const appStyles: AppStyles = {
     paddingBottom: 10,
     color:"black",
   },
-  
+
+
+  // game post -------------
+
+  innerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backText: {
+    marginLeft: 4,
+    fontSize: 16,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  logo: {
+    width: 55,
+    height: 55,
+  },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingTop: 12,
+  },
+  pinnedChat: {
+    backgroundColor: "#f2f2f2",
+    borderRadius: 8,
+    padding: 8,
+    margin: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+  },
+  boxPinnedInner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  boxInnerContainer: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  pinnedMessageHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+  },
+  postHost: {
+    flex: 1,
+  },
+  pinnedByText: {
+    fontSize: 12,
+    color: "#333",
+  },
+  postByText: {
+    fontSize: 12,
+    color: "#333",
+  },
+  dateTimeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dateText: {
+    fontSize: 12,
+    marginLeft: 4,
+    marginRight: 8,
+  },
+  timeText: {
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  boxses: {
+    marginBottom: 24,
+    width: "100%",
+  },
+  boxInner: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    maxWidth: "90%",
+  },
+  boxInnerWrapper: {
+    width: "100%",
+  },
+  messageHeader: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    // marginBottom: 8,
+  },
+  postContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    // marginRight: 8,
+  },
+  postHostText: {
+    fontSize: 12,
+    color: "#737373",
+    marginRight: 4,
+  },
+  nameText: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  boxRightArea: {
+    // flex: 1,
+  },
+  marketNameText: {
+    fontWeight: "bold",
+    // marginBottom: 8,
+  },
+  marketText: {
+    color: "green",
+  },
+  tricksInfoContainer: {
+    marginVertical: 8,
+  },
+  tricksFromText: {
+    marginBottom: 8,
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+  dateContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  emojiReactions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 4,
+  },
+  reactionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  emojiText: {
+    fontSize: 16,
+  },
+  emojiCount: {
+    fontSize: 12,
+    marginLeft: 2,
+  },
+  messageTricks: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  trickText: {
+    textAlign: "right",
+    marginBottom: 4,
+  },
+  valuesContainer: {
+    alignItems: "flex-end",
+    marginTop: 8,
+  },
+  valueRow: {
+    marginBottom: 4,
+  },
+  valueLabel: {
+    fontWeight: "bold",
+    width: 80,
+    textAlign: "center",
+  },
+  emojiWrapper: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  predefinedEmojis: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  emojiBtn: {
+    marginRight: 8,
+  },
+  emojiPickerIcon: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 12,
+  },
+  dateTimeFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  replyButton: {
+    marginTop: 4,
+  },
+  replyText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  replyOptionsContainer: {
+    backgroundColor: "#f9f9f9",
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  replyOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  replyOptionText: {
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  replyCount: {
+    fontSize: 12,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  noDataContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  noDataText: {
+    color: "#666",
+    fontSize: 16,
+  },
+  addPostButton: {
+    alignSelf: "center",
+    backgroundColor: "green",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  addPostText: {
+    color: "white",
+    fontWeight: "500",
+  },
 };
 
 export default appStyles;

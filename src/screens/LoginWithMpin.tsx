@@ -148,7 +148,7 @@ try{
                       <Text style={styles.signupText}>
                                     <Text
                                       style={styles.signupLink}
-                                      onPress={() => navigation.navigate('MpinScreen')}>
+                                      onPress={() => navigation.navigate('ForgotPassword')}>
                                       Forgot Password
                                     </Text>
                                   </Text>

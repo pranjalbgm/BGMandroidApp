@@ -8,21 +8,23 @@ import {
   ScrollView,
 } from "react-native";
 import Modal from "react-native-modal";
-import Toast from 'react-native-simple-toast';
 import RNPickerSelect from "react-native-picker-select";
+import Toast from "react-native-simple-toast";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from "moment";
 
 const GamePostFormModal = ({
+  gameSubmitChat,
   showModal,
   handleClose,
   onSubmit,
   playerData,
-  gameSubmitChat,
   markets,
 }) => {
   const [formData, setFormData] = useState({
     market: "",
     anotherMarket: "",
-    tricks: "",
+    tricks: [""],
     single1: "",
     single2: "",
     spot1: "",
@@ -30,33 +32,93 @@ const GamePostFormModal = ({
     fix1: "",
     fix2: "",
     postBy: "",
+    dateFrom: "",
+    dateTo: "",
   });
 
-  const handleChange = (name, value) => {
-    if (
-      ["single1", "single2", "spot1", "spot2", "fix1", "fix2"].includes(name) &&
-      value.length > 2
-    ) {
-      return; // Restrict input length to 2 digits
+  
+  const [showFromPicker, setShowFromPicker] = useState(false);
+const [showToPicker, setShowToPicker] = useState(false);
+
+  const handleNumberChange = (name, value) => {
+    if (/^\d{0,2}$/.test(value)) {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    if (!formData.market || !formData.tricks) {
-      return Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Market and Trick fields are required!",
-      });
-    }
+  const handleTrickChange = (index, value) => {
+    const allowedChars = /^[0-9+\-*/%()=:a-zA-Z]*$/;
+    if (!allowedChars.test(value)) return;
+
+    const lettersCount = value.replace(/[^a-zA-Z]/g, "").length;
+    if (lettersCount > 4) return;
+
+    const updatedTricks = [...formData.tricks];
+    updatedTricks[index] = value;
+    setFormData((prev) => ({ ...prev, tricks: updatedTricks }));
+  };
+
+  const addTrickRow = () => {
+    setFormData((prev) => ({
+      ...prev,
+      tricks: [...prev.tricks, ""],
+    }));
+  };
+
+  const removeTrickRow = (index) => {
+    const updatedTricks = [...formData.tricks];
+    updatedTricks.splice(index, 1);
+    setFormData((prev) => ({ ...prev, tricks: updatedTricks }));
+  };
+
+  const getOpenMarketItems = () => {
+    if (!markets || !Array.isArray(markets)) return [];
+    return markets
+      .filter((market) => market && market.market_status !== "Closed")
+      .map((market) => ({ label: market.market, value: market.market }));
+  };
+
+  const getAllMarketItems = () => {
+    if (!markets || !Array.isArray(markets)) return [];
+    return markets
+      .filter((market) => market)
+      .map((market) => ({
+        label: market.market,
+        value: market.market,
+      }));
+  };
+
+
+const handleFromDateChange = (event, selectedDate) => {
+  setShowFromPicker(false);
+  if (selectedDate) {
+    const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
+    setFormData((prev) => ({ ...prev, dateFrom: formattedDate }));
+  }
+};
+
+const handleToDateChange = (event, selectedDate) => {
+  setShowToPicker(false);
+  if (selectedDate) {
+    const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
+    setFormData((prev) => ({ ...prev, dateTo: formattedDate }));
+  }
+};
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!formData.market) return Toast.show("Please select a market!", Toast.LONG);
 
     const newMessage = {
       mobile: playerData?.mobile,
-      text: formData.tricks,
+      text: playerData?.name,
       message_by: "User",
       market: formData.market,
       tricksfrom: formData.anotherMarket,
+      dateFrom: formData.dateFrom,
+      dateTo: formData.dateTo,
       tricks: formData.tricks,
       name: playerData?.name,
       created_at: new Date().toISOString(),
@@ -71,31 +133,23 @@ const GamePostFormModal = ({
 
     if (playerData?.game_host === "yes" && playerData?.block === "no") {
       gameSubmitChat(newMessage);
-    } else if (playerData?.block === "yes") {
-      Toast.show({
-        type: "error",
-        text1: "Blocked",
-        text2: "You are blocked, please contact Admin.",
-      });
     } else {
-      Toast.show({
-        type: "error",
-        text1: "Permission Denied",
-        text2: "You don't have permission to post.",
-      });
+      Toast.show("You don't have permission to post, please contact Admin", Toast.LONG);
     }
 
     setFormData({
       market: "",
-      anotherMarket: "",
-      tricks: "",
       single1: "",
       single2: "",
       spot1: "",
       spot2: "",
       fix1: "",
       fix2: "",
-      postBy: "",
+      postBy: playerData?.name || "",
+      anotherMarket: "",
+      dateFrom: "",
+      dateTo: "",
+      tricks: [""],
     });
 
     handleClose();
@@ -107,70 +161,107 @@ const GamePostFormModal = ({
         <Text style={styles.title}>Game Posting Form</Text>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Market Picker */}
           <Text style={styles.label}>Market</Text>
           <RNPickerSelect
-            onValueChange={(value) => handleChange("market", value)}
-            items={markets
-              ?.filter((market) => market.market_status !== "Closed")
-              .map((market) => ({ label: market.market, value: market.market }))}
+            onValueChange={(value) => setFormData((prev) => ({ ...prev, market: value }))}
+            items={getOpenMarketItems()}
             value={formData.market}
             placeholder={{ label: "Select Market", value: "" }}
             style={pickerStyles}
           />
 
-          {/* Trick From Picker */}
           <Text style={styles.label}>Trick from</Text>
           <RNPickerSelect
-            onValueChange={(value) => handleChange("anotherMarket", value)}
-            items={markets?.map((market) => ({
-              label: market.market,
-              value: market.market,
-            }))}
+            onValueChange={(value) => setFormData((prev) => ({ ...prev, anotherMarket: value }))}
+            items={getAllMarketItems()}
             value={formData.anotherMarket}
             placeholder={{ label: "Select Market", value: "" }}
             style={pickerStyles}
           />
 
-          {/* Tricks Input */}
-          <Text style={styles.label}>Your Trick</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Trick"
-            value={formData.tricks}
-            onChangeText={(value) => handleChange("tricks", value)}
-          />
+          {/* ✅ New Date Inputs */}
+          <Text style={styles.label}>Date From</Text>
+<TouchableOpacity
+  style={styles.input}
+  onPress={() => setShowFromPicker(true)}
+>
+  <Text style={{ color: formData.dateFrom ? "black" : "gray" }}>
+    {formData.dateFrom || "Select Date"}
+  </Text>
+</TouchableOpacity>
+{showFromPicker && (
+  <DateTimePicker
+    value={formData.dateFrom ? new Date(formData.dateFrom) : new Date()}
+    mode="date"
+    display="default"
+    onChange={handleFromDateChange}
+  />
+)}
 
-          {/* Number Inputs */}
-          {["SINGLE", "SPOT", "FIX"].map((label, index) => (
+<Text style={styles.label}>Date To</Text>
+<TouchableOpacity
+  style={styles.input}
+  onPress={() => setShowToPicker(true)}
+>
+  <Text style={{ color: formData.dateTo ? "black" : "gray" }}>
+    {formData.dateTo || "Select Date"}
+  </Text>
+</TouchableOpacity>
+{showToPicker && (
+  <DateTimePicker
+    value={formData.dateTo ? new Date(formData.dateTo) : new Date()}
+    mode="date"
+    display="default"
+    onChange={handleToDateChange}
+  />
+)}
+
+
+          <Text style={styles.label}>Your Trick</Text>
+          {formData.tricks.map((trick, index) => (
+            <View key={index} style={styles.trickRow}>
+              <TextInput
+                style={styles.inputTrick}
+                placeholder="Enter Trick"
+                value={trick}
+                onChangeText={(value) => handleTrickChange(index, value)}
+              />
+              {index === 0 ? (
+                <TouchableOpacity style={styles.addButton} onPress={addTrickRow}>
+                  <Text style={styles.addText}>+</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.deleteButton} onPress={() => removeTrickRow(index)}>
+                  <Text style={styles.deleteText}>-</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+
+          {["single", "spot", "fix"].map((label, index) => (
             <View key={index}>
-              <Text style={styles.label}>{label}</Text>
+              <Text style={styles.label}>{label.toUpperCase()}</Text>
               <View style={styles.row}>
                 <TextInput
                   style={styles.input}
                   keyboardType="numeric"
                   placeholder="00"
                   maxLength={2}
-                  value={formData[`${label.toLowerCase()}1`]}
-                  onChangeText={(value) =>
-                    handleChange(`${label.toLowerCase()}1`, value)
-                  }
+                  value={formData[`${label}1`]}
+                  onChangeText={(value) => handleNumberChange(`${label}1`, value)}
                 />
                 <TextInput
                   style={styles.input}
                   keyboardType="numeric"
                   placeholder="00"
                   maxLength={2}
-                  value={formData[`${label.toLowerCase()}2`]}
-                  onChangeText={(value) =>
-                    handleChange(`${label.toLowerCase()}2`, value)
-                  }
+                  value={formData[`${label}2`]}
+                  onChangeText={(value) => handleNumberChange(`${label}2`, value)}
                 />
               </View>
             </View>
           ))}
 
-          {/* Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
               <Text style={styles.buttonText}>Cancel</Text>
@@ -191,7 +282,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   container: {
-    backgroundColor: "#222",
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
     width: "90%",
@@ -201,23 +292,57 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
-    color: "#fff",
+    color: "black",
   },
   label: {
-    color: "#fff",
+    color: "black",
     marginBottom: 5,
     marginTop: 10,
   },
   input: {
-    backgroundColor: "#333",
-    color: "#fff",
+    backgroundColor: "lightgrey",
+    color: "black",
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 5,
+  },
+  inputTrick: {
+    backgroundColor: "lightgrey",
+    color: "black",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  trickRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  addButton: {
+    backgroundColor: "green",
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  deleteButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  addText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  deleteText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -232,7 +357,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   submitButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "green",
     padding: 12,
     borderRadius: 5,
     flex: 1,
@@ -246,8 +371,8 @@ const styles = StyleSheet.create({
 });
 
 const pickerStyles = {
-  inputIOS: { color: "white", padding: 10, backgroundColor: "#333" },
-  inputAndroid: { color: "white", padding: 10, backgroundColor: "#333" },
+  inputIOS: { color: "black", padding: 10, backgroundColor: "lightgrey" },
+  inputAndroid: { color: "black", padding: 10, backgroundColor: "lightgrey" },
 };
 
 export default GamePostFormModal;

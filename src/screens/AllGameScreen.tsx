@@ -1,73 +1,49 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
-  Easing,
   TouchableWithoutFeedback,
-  Image,
-  ImageBackground,
-  Modal,
-  Linking,
-  TextInput,
+  ScrollView
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import Octicons from 'react-native-vector-icons/Octicons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Feather from 'react-native-vector-icons/Feather';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {ScrollView} from 'react-native-gesture-handler';
+import { StackNavigationProp } from '@react-navigation/stack';
+import Toast from 'react-native-simple-toast';
+
 import NavFooter from '../components/NavFooter';
-import TextTicker from 'react-native-text-ticker';
-import appStyles from '../styles/appStyles';
-import useMarkets from '../hooks/useMarkets';
-import {isTimeNotPassed} from '../utils/time';
-import useHome, {usePlayerData, usePlayerDataFetch} from '../hooks/useHome';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
-import {useVerifyAadhaar, useVerifyPan} from '../hooks/useAddKYC';
-import apiClient, {BaseURLCLUB} from '../constants/api-client';
-import {showAlert} from '../components/Alert';
-import {fetchMobile} from '../hooks/useWallet';
-import Loader from '../components/Loader';
-import DocumentPicker from 'react-native-document-picker';
-import {ImageStyle, TextStyle} from 'react-native';
-import Toast from 'react-native-simple-toast';
 import KycModal from '../components/KycModal';
+import Loader from '../components/Loader';
+
+import useMarkets from '../hooks/useMarkets';
+import useHome, { usePlayerDataFetch } from '../hooks/useHome';
+import { fetchMobile } from '../hooks/useWallet';
 import { getButtonText } from '../utils/KycUtils';
+import appStyles from '../styles/appStyles';
 
-const AllGameScreen = ({navigation}: any) => {
-  const [isMenuVisible, setMenuVisibility] = useState(false);
-  const [modalVisibleWhatsApp, setModalVisibleWhatsApp] = useState(false);
-  const [modalVisibleReferAndEarn, setModalReferAndEarn] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [navTabsHomeName, setNavTabsHomeName] = useState('IdProof');
-  const [mobile, setMobile] = useState('');
-  const [loader, setLoader] = useState(false);
-  // const playerInfo = usePlayerData();
-const {refetch}= usePlayerDataFetch(mobile);
-const playerInfo = usePlayerDataFetch(mobile);
+interface Market {
+  id: string;
+  status: boolean;
+  market: string;
+  market_status: string;
+}
 
-  const {markets} = useMarkets();
-  const {home} = useHome();
+interface AllGameScreenProps {
+  navigation: StackNavigationProp<any>;
+}
 
-  interface Market {
-    id: string;
-    status: boolean;
-    market: string;
-    open_time: string;
-    close_time: string;
-  }
+const AllGameScreen: React.FC<AllGameScreenProps> = ({ navigation }) => {
+  const [isMenuVisible, setMenuVisibility] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [mobile, setMobile] = useState<string>('');
+  const [loader, setLoader] = useState<boolean>(false);
 
-  //  useEffect(() => {
-  //     fetchMobile(setMobile);
-  //     refetch()
-  //   }, []); 
-    useEffect(() => {
+  const { markets } = useMarkets();
+  const { refetch } = usePlayerDataFetch(mobile);
+  const playerInfo = usePlayerDataFetch(mobile);
+
+   useEffect(() => {
         const initializeMobile = async () => {
           const fetchedMobile = await fetchMobile(setMobile);
           if (fetchedMobile) {
@@ -78,176 +54,153 @@ const playerInfo = usePlayerDataFetch(mobile);
         initializeMobile();
       }, []);
 
+  const filteredMarkets = useMemo(
+    () => markets?.filter((market: Market) => market.status),
+    [markets]
+  );
 
-
-    const onPlayClick = (market: Market) => {
+  const onPlayClick = useCallback(
+    (market: Market) => {
+      setLoader(true);
       try {
-        setLoader(true);
-        const buttonText = getButtonText(playerInfo); 
+        const buttonText = getButtonText(playerInfo);
         if (buttonText === 'KYC Verified!') {
           navigation.navigate('MoringStarScreen', { market });
         } else {
-          // setModalVisible(true);
-          Toast.show(buttonText, Toast.LONG); 
+          Toast.show(buttonText, Toast.LONG);
         }
       } catch (error) {
-        console.error("Error in onPlayClick:", error);
+        console.error('Error in onPlayClick:', error);
         Toast.show('Something went wrong. Please try again.', Toast.LONG);
       } finally {
         setLoader(false);
       }
-    };
-
-    
- 
+    },
+    [playerInfo, navigation]
+  );
 
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setMenuVisibility(false)}>
-        <View style={{flex: 1, backgroundColor: 'white'}}>
-          <Header
-            page={'Games'}
-            setMenuVisibility={setMenuVisibility}
-            isMenuVisible={isMenuVisible}
-          />
-
-          <View style={{flex: 1, flexDirection: 'row'}}>
-            <Navbar
-              navigation={navigation}
-              isMenuVisible={isMenuVisible}
-              modalVisibleWhatsApp={modalVisibleWhatsApp}
-              setModalVisibleWhatsApp={setModalVisibleWhatsApp}
-            />
-
+        <View style={styles.container}>
+          <Header page="Games" setMenuVisibility={setMenuVisibility} isMenuVisible={isMenuVisible} />
+          <View style={styles.content}>
+            <Navbar navigation={navigation} isMenuVisible={isMenuVisible} />
             <ScrollView>
-              <TouchableWithoutFeedback>
+              <View style={styles.header}>
+                <Text style={styles.headerText}>All Games</Text>
+              </View>
+              <View style={styles.marketHeader}>
+                <Text style={styles.marketTitle}>Market Name</Text>
+                <Text style={styles.marketAction}>Action</Text>
+              </View>
+              <ScrollView>
+                <TouchableWithoutFeedback>
                 <View>
-                  <View style={{backgroundColor: 'white', padding: 20}} />
-                  <View style={{marginTop: 0}}>
-                    <View style={{backgroundColor: '#001C0D', padding: 20}}>
-                      <Text
-                        style={{color: 'white',textAlign: 'center',fontWeight: '800',fontSize: 20, }}>
-                        All Games
-                      </Text>
+                  {filteredMarkets?.map((market: Market) => (
+                    <View key={market.id} style={styles.marketItem}>
+                      <Text style={styles.marketName}>{market.market}</Text>
+                      <TouchableOpacity
+                       style={styles.Btn}
+                        onPress={market.market_status !== 'Closed' ? () => onPlayClick(market) : undefined}
+                      >
+                        <Text style={market.market_status !== 'Closed' ? styles.primaryBtn : styles.secondaryBtn}>
+                          {market.market_status !== 'Closed' ? 'Play Games' : 'Time Out'}
+                        </Text>
+                        {/* <View style={styles.bottomBorder} /> */}
+                      </TouchableOpacity>
                     </View>
-
-                    <View
-                      style={{backgroundColor: 'white',padding: 20,display: 'flex',alignItems: 'center',justifyContent: 'space-between',flexDirection: 'row',}}>
-                      <Text
-                        style={{color: 'darkgreen',textAlign: 'left',fontWeight: '800',fontSize: 20,}}>
-                        Market Name
-                      </Text>
-                      <Text
-                        style={{color: 'darkgreen',textAlign: 'right',fontWeight: '800',}}>
-                        Action
-                      </Text>
-                    </View>
-
-                    <ScrollView scrollEnabled showsVerticalScrollIndicator>
-                      <View>
-                        {markets?.map(
-                          (market: any) =>
-                            market.status && (
-                              <View
-                                key={market.id}
-                                style={{
-                                  backgroundColor: '#E1EFE6',
-                                  padding:20,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  flexDirection: 'row',
-                                  marginBottom:10,
-                                }}>
-                                {market.market_status !== "Closed" ? (
-                                  <>
-                                    <View>
-                                      <Text
-                                        style={{
-                                          fontSize: 15,
-                                          color: '#000000',
-                                          textAlign: 'left',
-                                          fontWeight: '500',
-                                        }}>
-                                        {market.market}
-                                      </Text>
-                                    </View>
-                                    <View>
-                                      <TouchableOpacity
-                                        style={styles.Btn}
-                                        onPress={() => onPlayClick(market)}>
-                                        <Text style={styles.primaryBtn}>
-                                          Play Games
-                                        </Text>
-                                        <View style={styles.bottomBorder} />
-                                      </TouchableOpacity>
-                                    </View>
-                                  </>
-                                ) : (
-                                  <>
-                                    <View>
-                                      <Text
-                                        style={{
-                                          fontSize: 15,
-                                          color: '#000000',
-                                          textAlign: 'left',
-                                          fontWeight: '500',
-                                        }}>
-                                        {market.market}
-                                      </Text>
-                                    </View>
-                                    <View>
-                                      <TouchableOpacity style={styles.Btn}>
-                                        <Text style={styles.secondaryBtn}>
-                                          Time Out
-                                        </Text>
-                                        <View style={styles.bottomBorder} />
-                                      </TouchableOpacity>
-                                    </View>
-                                  </>
-                                )}
-                              </View>
-                            ),
-                        )}
-                      </View>
-                    </ScrollView>
-                  </View>
+                  ))}
                 </View>
-              </TouchableWithoutFeedback>
+                </TouchableWithoutFeedback>
+              </ScrollView>
             </ScrollView>
           </View>
 
-          {/* kyc modal */}
           <KycModal
             animationType="fade"
-            transparent={true}
+            transparent
             visible={modalVisible}
             setModalVisible={setModalVisible}
             mobile={mobile}
             playerData={playerInfo}
           />
-          {/* kyc modal */}
 
           <Loader visiblity={loader} />
-
-          {isMenuVisible && (
-            <TouchableWithoutFeedback onPress={() => setMenuVisibility(false)}>
-              <Animated.View
-                style={[
-                  StyleSheet.absoluteFill,
-                  {backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 0},
-                ]}
-              />
-            </TouchableWithoutFeedback>
-          )}
         </View>
       </TouchableWithoutFeedback>
-
       <NavFooter />
     </>
   );
 };
+
 const styles = StyleSheet.create({
   ...appStyles,
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  header: {
+    backgroundColor: '#001C0D',
+    padding: 20,
+  },
+  headerText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: '800',
+    fontSize: 20,
+  },
+  marketHeader: {
+    backgroundColor: 'white',
+    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  marketTitle: {
+    color: 'darkgreen',
+    fontWeight: '800',
+    fontSize: 20,
+  },
+  marketAction: {
+    color: 'darkgreen',
+    fontWeight: '800',
+  },
+  marketItem: {
+    backgroundColor: '#E1EFE6',
+    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  marketName: {
+    fontSize: 15,
+    color: '#000000',
+    fontWeight: '500',
+  },
+  activeBtn: {
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 5,
+  },
+  inactiveBtn: {
+    backgroundColor: 'gray',
+    padding: 10,
+    borderRadius: 5,
+  },
+  activeBtnText: {
+    color: 'white',
+    fontWeight: '700',
+  },
+  inactiveBtnText: {
+    color: 'white',
+    fontWeight: '700',
+  },
 });
+
 export default AllGameScreen;

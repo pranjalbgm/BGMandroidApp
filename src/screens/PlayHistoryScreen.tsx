@@ -12,7 +12,7 @@ import {
   Button,
   FlatList,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -48,12 +48,18 @@ export function getTodayDate() {
 
 const PlayHistoryScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const routeParams = route.params || {};
+  const dateFromCalendar = routeParams.date;
   //---------- Game Dropdown ----------//
   const [market, setMarket] = useState('');
   //----------  Game Dropdown  End----------//
 
   //---------- Date Dropdown ----------//
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(
+    dateFromCalendar ? new Date(dateFromCalendar) : null
+  );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loader, setLoader] = useState(false);
   const [hasEffectBeenCalled, setHasEffectBeenCalled] = useState(false);
@@ -75,14 +81,30 @@ const PlayHistoryScreen = () => {
     isPrevDisabled,
     currentPage,
     refetch,
-  } = useMyPlayHistory({market: '', date: '', initialPage: 1, pageSize: 10});
+  } = useMyPlayHistory({
+    market: market,
+    date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '',
+    initialPage: 1,
+    pageSize: 10
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [market, selectedDate]);
+
+  useEffect(() => {
+    if (dateFromCalendar) {
+      setSelectedDate(new Date(dateFromCalendar));
+    }
+  
+  }, [dateFromCalendar]);
 
   console.log(
     'check on page data is coming properly or not ===============>',
     myPlayHistory,
   );
 
-  const isDeletable = createdAt => {
+  const isDeletable = (createdAt: any) => {
     const createTime = new Date(createdAt);
     const currentTime = new Date();
     const difference = (currentTime - createTime) / (1000 * 60);

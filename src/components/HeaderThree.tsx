@@ -9,7 +9,14 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-const HeaderThree = ({title,onGoBack}) => {
+
+interface HeaderThreeProps {
+  title: string;
+  onGoBack?: () => void;  // Optional onGoBack function
+}
+
+
+const HeaderThree: React.FC<HeaderThreeProps> = ({ title, onGoBack }) => {
   const navigation = useNavigation();
   const handleGoBack = () => {
     
@@ -20,7 +27,7 @@ const HeaderThree = ({title,onGoBack}) => {
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      navigation.navigate('HomeScreen'); 
+      navigation.navigate('HomeScreen' as never); 
     }
   };
   return (

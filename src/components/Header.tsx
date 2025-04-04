@@ -1,98 +1,93 @@
-import React, { useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import appStyles from '../styles/appStyles';
 import useWallet from '../hooks/useWallet';
-import {useNavigation} from '@react-navigation/native';
-import {useRoute} from '@react-navigation/native';
-import {getData} from '../constants/storage';
-import axios from 'axios';
-import {BaseURLCLUB} from '../constants/api-client';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const Header = ({page, isMenuVisible, setMenuVisibility}: any) => {
-  const {wallet, isLoading, refetchWallet} = useWallet();
-  const navigation = useNavigation();
-  const [isMenu, setMenu] = useState(true);
+// Define types for props
+interface HeaderProps {
+  page: string;
+  isMenuVisible: boolean;
+  setMenuVisibility: (visible: boolean) => void;
+}
 
-  const [key, setKey] = useState(0);
+// Define navigation types
+type RootStackParamList = {
+  Home: undefined;
+  NotificationScreen: undefined;
+};
 
-  // const onRefresh = () => {r
-  //   // refetchWallet()
-  //   console.log("this is clicked ")
-  //   setKey((prevKey) => prevKey + 1)
-  //   if (page == 'Home') {
-
-  //   }
-  // }
+const Header: React.FC<HeaderProps> = ({ page, isMenuVisible, setMenuVisibility }) => {
+  const { wallet } = useWallet();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const [isMenu, setMenu] = useState<boolean>(true);
 
   const onRefresh = () => {
-    const state = navigation.getState(); // Get the current navigation state
+    const state = navigation.getState();
     if (state) {
-      const currentRoute = state.routes[state.index]; // Safely access the current route
+      const currentRoute = state.routes[state.index];
       if (currentRoute) {
         navigation.reset({
           index: 0,
-          routes: [{name: currentRoute.name}], // Reload the same route
+          routes: [{ name: currentRoute.name as keyof RootStackParamList }],
         });
       }
     }
   };
 
+  const handleMenuToggle = () => {
+    setMenuVisibility(!isMenuVisible);
+    setMenu(!isMenu);
+  };
+
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#ffffff',
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          borderRadius: 5,
-        }}
+      <TouchableWithoutFeedback
         onPress={() => {
-          setMenuVisibility(!isMenuVisible), setMenu(!isMenu);
-        }}>
-        <Text>
-          {isMenu ? (
-            <Octicons name="three-bars" size={22} color="#4CB050" /> // Hamburger menu icon
-          ) : (
-            <Octicons name="x" size={22} color="#4CB050" /> // Cross icon
-          )}
-        </Text>
-      </TouchableOpacity>
-      <View
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            color: '#4CB050',
-            marginHorizontal: 10,
-            fontWeight: '500',
-          }}>
-          {page}
-        </Text>
-        <TouchableOpacity onPress={() => onRefresh()} style={styles.Btn}>
+          if (isMenuVisible) {
+            setMenuVisibility(false);
+            setMenu(true);
+          }
+        }}
+      >
+        <View>
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={handleMenuToggle}
+          >
+            <Text>
+              {isMenu ? (
+                <Octicons name="three-bars" size={22} color="#4CB050" />
+              ) : (
+                <Octicons name="x" size={22} color="#4CB050" />
+              )}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+
+      <View style={styles.centerContent}>
+        <Text style={styles.pageText}>{page}</Text>
+        <TouchableOpacity onPress={onRefresh} style={styles.Btn}>
           <Text style={styles.primaryBtn}>Refresh</Text>
           <View style={styles.bottomBorder} />
         </TouchableOpacity>
-        <Text
-          style={{
-            color: 'darkgreen',
-            marginHorizontal: 10,
-            fontWeight: '500',
-          }}>
-          Points:
-          <Text style={{color: 'darkgreen'}}>{wallet?.wallet}</Text>
+        <Text style={styles.pointsText}>
+          Points: <Text style={{ color: 'darkgreen' }}>{wallet?.wallet}</Text>
         </Text>
       </View>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('NotificationScreen')}>
-        <Text style={{color: '#ffffff'}}>
-          <AntDesign name="bells" size={22} color={'#000000'} />
-        </Text>
+
+      <TouchableOpacity onPress={() => navigation.navigate('NotificationScreen')}>
+        <AntDesign name="bells" size={22} color={'#000000'} />
       </TouchableOpacity>
     </View>
   );
@@ -100,6 +95,28 @@ const Header = ({page, isMenuVisible, setMenuVisibility}: any) => {
 
 const styles = StyleSheet.create({
   ...appStyles,
+  menuButton: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  centerContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  pageText: {
+    color: '#4CB050',
+    marginHorizontal: 10,
+    fontWeight: '500',
+  },
+  pointsText: {
+    color: 'darkgreen',
+    marginHorizontal: 10,
+    fontWeight: '500',
+  },
 });
 
 export default Header;

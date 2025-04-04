@@ -1,210 +1,157 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
-  Easing,
-  TouchableWithoutFeedback,
-  Image,
   TextInput,
-  Button,
+  ScrollView,
+  Image,
+  Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {ScrollView} from 'react-native-gesture-handler';
 import HeaderThree from '../components/HeaderThree';
-import NavFooter from '../components/NavFooter';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import appStyles from '../styles/appStyles';
-import useEditProfile from '../hooks/useEditProfile';
+import useWallet, { fetchMobile } from '../hooks/useWallet';
 import usePlayerProfile from '../hooks/usePlayerProfile';
-import useWalletAmount from '../hooks/useWalletAmount';
-import {usePlayerData, usePlayerDataFetch} from '../hooks/useHome';
-import useWallet, {fetchMobile} from '../hooks/useWallet';
-import {format} from 'date-fns';
+import { format } from 'date-fns';
 import DocumentPicker from 'react-native-document-picker';
-import apiClient, {BaseURLCLUB, imageApiClient} from '../constants/api-client';
-import {showAlert} from '../components/Alert';
-import * as ImagePicker from 'react-native-image-picker';
-import RNFS from 'react-native-fs';
+import apiClient from '../constants/api-client';
+import Toast from 'react-native-simple-toast';
 import COLORS from '../components/COLORS';
 import Loader from '../components/Loader';
-import axios from 'axios';
-import Toast from 'react-native-simple-toast';
+import { usePlayerDataFetch } from '../hooks/useHome';
 
-const EditProfileScreen = () => {
-  const [mobile, setMobile] = useState('');
-  const [errors, setErrors] = useState({});
-  const [imageData, setimageData] = useState({});
-  const [loader, setLoader] = useState(false);
-  const {refetch}= usePlayerDataFetch(mobile);
+// Optimized interfaces
+interface FormFieldProps {
+  label: string;
+  value: string;
+  placeholder: string;
+  editable?: boolean;
+  onFocus?: () => void;
+  keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad';
+}
 
-  const handleFieldClick = fieldName => {
-    setErrors(prevErrors => ({
-      ...prevErrors,
-      [fieldName]: `${fieldName} is not editable.`,
-    }));
+// Reusable FormField component
+const FormField: React.FC<FormFieldProps> = ({ 
+  label, 
+  value, 
+  placeholder, 
+  editable = true, 
+  onFocus, 
+  keyboardType = 'default' 
+}) => (
+  <View style={styles.fieldContainer}>
+    <Text style={styles.fieldLabel}>{label}</Text>
+    <View style={styles.inputField}>
+      <TextInput
+        value={value}
+        placeholder={placeholder}
+        style={{ color: COLORS.black }}
+        editable={editable}
+        onFocus={onFocus}
+        keyboardType={keyboardType}
+      />
+    </View>
+  </View>
+);
+
+const EditProfileScreen: React.FC = () => {
+  // State management
+  const [mobile, setMobile] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageData, setImageData] = useState<any>(null);
+  const [loader, setLoader] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  
+  // Custom hooks
+  const playerData = usePlayerDataFetch(mobile);
+  const { wallet } = useWallet();
+  const { playerDetails } = usePlayerProfile();
+
+  // Initialize mobile number and fetch player data
+  useEffect(() => {
+    const initializeMobile = async (): Promise<void> => {
+      const fetchedMobile = await fetchMobile(setMobile);
+      if (fetchedMobile) {
+        playerData.refetch(fetchedMobile);
+      }
+    };
+    initializeMobile();
+  }, []);
+
+  // Update date when player data changes
+  useEffect(() => {
+    if (playerData.data) {
+      setSelectedDate(playerData.data.dob || null);
+    }
+  }, [playerData.data]);
+
+  const handleFieldClick = (fieldName: string): void => {
     Toast.show(`${fieldName} is not editable.`, Toast.LONG);
-    // ToastAndroid.show(`${fieldName} is not editable.`, ToastAndroid.SHORT);
   };
 
-  // =========> Select file from memory and set in state
-  const pickDocument = async setter => {
+  const pickDocument = async (): Promise<void> => {
     try {
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.images],
-        allowMultiSelection: false, // Specify image types if needed
+        allowMultiSelection: false,
       });
-
-      console.log(result);
-
-      // const uri = result[0].uri;
-      // const fileName = result[0].name;
-      // const destPath = RNFS.DocumentDirectoryPath + '/' + fileName;
-
-      // await RNFS.copyFile(uri, destPath);
-
-      // setter(destPath); // Set the state with the local URI of the copied image
-
-      setter(result[0].uri);
-      setimageData(result[0]);
-      // console.log(result)
-
-      // setter(result)
-
-      // Convert the image to base64
-      // const imageUri = result[0].uri;
-      // const response = await fetch(imageUri);
-      // const blob = await response.blob();
-      // const reader = new FileReader();
-      // reader.readAsDataURL(blob); // Read the blob as a base64 string
-      // reader.onloadend = () => {
-      //   const base64String = reader.result; // This is your base64 string
-      //   setter(base64String);
-      // };
+      
+      setImageData(result[0]);
     } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-      } else {
-        throw err;
+      if (!DocumentPicker.isCancel(err)) {
+        console.error("Document picker error:", err);
       }
     }
   };
 
-   useEffect(() => {
-          const initializeMobile = async () => {
-            const fetchedMobile = await fetchMobile(setMobile);
-            if (fetchedMobile) {
-              // playerInfo.mutate({ mobile: fetchedMobile });
-              refetch(fetchedMobile)
-            }
-          };
-          initializeMobile();
-        }, []);
-  
-
-  const validateName = name => {
-    if (!name.trim()) {
-      setErrors(prevErrors => ({...prevErrors, name: 'Name cannot be empty.'}));
-    } else {
-      setErrors(prevErrors => ({...prevErrors, name: null}));
-    }
-  };
-
-  // =========> Make API Requests using custom hooks
-  const {editProfile} = useEditProfile();
-  const {playerDetails} = usePlayerProfile();
-  const {wallet} = useWallet();
-    const playerData = usePlayerDataFetch(mobile);
-    console.log("playerdata----------",playerData)
-
-  // console.log(playerData)
-
-  // =========> Fetch player info
-
-  // =========> Form Data Handling and submission
-  const [image, setImage] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [bank, setBank] = useState('');
-  const [account_number, setAccountNumber] = useState('');
-  const [ifsc, setIfsc] = useState('');
-
-  
-
-  // const actions: {
-  //   title: "Select Image",
-  //   type: "library",
-  //   options: {
-  //     selectionLimit: 0,
-  //     mediaType: "photo",
-  //     includeBase64: false,
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (!mobile) {
-  //     fetchMobile(setMobile).then(mobile => playerData.mutate({mobile}));
-  //   }
-
-  //   fetchMobile(setMobile).then(mobile =>
-  //     apiClient.post('player-profile/', {mobile}).then(res => {
-  //       console.log('player data :- ', res.data);
-
-  //       setName(res.data.name);
-  //       setEmail(res.data.email);
-  //       setSelectedDate(res.data.dob);
-  //       setBank(res.data.bank);
-  //       setAccountNumber(res.data.account_number);
-  //       setIfsc(res.data.ifsc);
-  //     }),
-  //   );
-  // }, [mobile]);
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const handleDateChange = (event, selected) => {
-    const currentDate = selected || selectedDate;
+  const handleDateChange = (event: any, selected?: Date): void => {
     setShowDatePicker(Platform.OS === 'ios');
-    setSelectedDate(format(currentDate, 'yyyy-MM-dd'));
-  };
-
-  const validation = () => {
-    if (!selectedDate) {
-      Toast.show('Please enter your dob', Toast.LONG);
-    } else {
-      submitInfo();
+    
+    if (selected) {
+      setSelectedDate(format(new Date(selected), 'yyyy-MM-dd'));
     }
   };
 
-  const submitInfo = async () => {
-    console.log('Starting KYC submission...');
+  const validation = (): void => {
+    if (!selectedDate) {
+      Toast.show('Please enter your date of birth', Toast.LONG);
+      return;
+    }
+    submitInfo();
+  };
+
+  const submitInfo = async (): Promise<void> => {
+    console.log('Starting profile update submission...');
   
     try {
-      if (!imageData) {
-        console.error('No image data found');
-        return;
-      }
-  
-      const imageUri = imageData?.uri;
-      const imageName = imageData?.name;
-      const imageType = imageData?.type;
-  
-      const formData = new FormData();
-      formData.append('dob', selectedDate);
-  
-      if (imageUri) {
-        formData.append('image', {
-          uri: imageUri,
-          type: imageType,
-          name: imageName,
-        });
-      }
-  
-      console.log('Form Data:', formData);
       setLoader(true);
+      
+      // Create FormData object
+      const formData = new FormData();
+      
+      // Always append DOB
+      formData.append('dob', selectedDate as string);
+  
+      // Only append image if we have one
+      if (imageData) {
+        console.log('Including image in submission:', imageData);
+        
+        // Create proper image object for FormData
+        const imageFile = {
+          uri: imageData.uri,
+          type: imageData.type || 'image/jpeg', // Fallback type if not provided
+          name: imageData.name || 'profile-image.jpg', // Fallback name if not provided
+        };
+        
+        formData.append('image', imageFile);
+      }
+  
+      // Log FormData before submission (for debugging)
+      console.log('FormData prepared for submission:', JSON.stringify(formData));
   
       const response = await apiClient.put(`/player-update/${mobile}/`, formData, {
         headers: {
@@ -213,198 +160,129 @@ const EditProfileScreen = () => {
         },
       });
   
-      if (response.status !== 200) {
-        console.log('Error Response:', response.data.error);
-        Toast.show(response.data.error, Toast.LONG);
-      } else {
-        console.log('Profile updated successfully');
+      if (response.status === 200) {
         Toast.show('Profile updated successfully', Toast.LONG);
-      }
-  
-      console.log('Response Data:', response);
-      setLoader(false);
-  
-    } catch (error) {
-      console.log('Error:', error);
-      setLoader(false);
-  
-      if (error.response) {
-        console.log('Error Response:', error.response.data);
-        Toast.show(error.response.data.error || 'Something went wrong', Toast.LONG);
-      } else if (error.request) {
-        console.log('Error Request:', error.request);
+        playerData.refetch(mobile);
       } else {
-        console.log('Error Message:', error.message);
+        Toast.show(response.data.error || 'Update failed', Toast.LONG);
       }
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      
+      const errorMessage = error.response?.data?.error || 'Network error. Please try again.';
+      Toast.show(errorMessage, Toast.LONG);
+    } finally {
+      setLoader(false);
     }
   };
 
-  useEffect(() => {
-    editProfile.isSuccess && console.log(editProfile.data);
-    // editProfile.isError && console.log(editProfile.error)
-  }, [editProfile]);
+  // Get image URI from state or player data
+  const getImageUri = (): string | null => {
+    if (imageData?.uri) {
+      return imageData.uri;
+    } else if (playerData?.data?.image) {
+      return playerData.data.image;
+    }
+    return null;
+  };
 
-  console.log('-===================>', playerData);
   return (
-    <View style={{flex: 1, backgroundColor: '#ffffff'}}>
+    <View style={styles.container}>
       <HeaderThree title={'Profile'} />
       <ScrollView>
-        <View style={{padding: 20}}>
+        <View style={styles.contentContainer}>
           {/* Balance and bonus */}
-          <View
-            style={{backgroundColor: '#000000', padding: 20, marginBottom: 15}}>
-            <Text
-              style={{
-                color: '#ffffff',
-                textAlign: 'center',
-                fontWeight: '500',
-              }}>
-              Balance:
-              <Text>{wallet && wallet?.total_amount}</Text>
+          <View style={styles.balanceCard}>
+            <Text style={styles.balanceText}>
+              Balance: <Text>{wallet?.total_amount || '0'}</Text>
             </Text>
           </View>
-          <View
-            style={{backgroundColor: '#000000', padding: 20, marginBottom: 15}}>
-            <Text
-              style={{
-                color: '#ffffff',
-                textAlign: 'center',
-                fontWeight: '500',
-              }}>
-              Bonus:
-              <Text>{(playerDetails && playerDetails[0]?.amount) || 0}</Text>
+          <View style={styles.balanceCard}>
+            <Text style={styles.balanceText}>
+              Bonus: <Text>{(playerDetails && playerDetails[0]?.commission_amount) || 0}</Text>
             </Text>
           </View>
 
           {/* Profile Image */}
-          <View style={{marginVertical: 25}}>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                onPress={() => pickDocument(setImage)}
-                activeOpacity={0.7}>
-                <View style={styles.uploadProfile}>
-                  {playerData && playerData.data && playerData.data.image ? (
-                    <View style={{position: 'relative'}}>
-                      <Image
-                        source={{
-                          uri: imageData.uri
-                            ? imageData.uri
-                            : 'https://api.thebgmgame.com/' +
-                              playerData.data.image,
-                        }}
-                        style={{width: 100, height: 100, borderRadius: 999}}
-                      />
-                      {/*  'https://api.thebgmgame.com/' + playerData.data.image */}
+          <View style={styles.profileImageContainer}>
+            <TouchableOpacity onPress={pickDocument} activeOpacity={0.7}>
+              <View style={styles.uploadProfile}>
+                {getImageUri() ? (
+                  <>
+                  <Image
+                    source={{ uri: getImageUri() as string }}
+                    style={styles.profileImage}
+                  />
+                  <View style={styles.cameraIcon}>
+                      <Ionicons name="camera" size={24} color="#ffffff" />
                     </View>
-                  ) : (
-                    <>
-                      <Image
-                        source={require('../images/profile.png')}
-                        style={styles.profileimg}
-                      />
-                      <View style={styles.icon}>
-                        <Ionicons name="camera" size={24} color="#ffffff" />
-                      </View>
                     </>
-                  )}
-                </View>
-              </TouchableOpacity>
-            </View>
+                ) : (
+                  <>
+                    <Image
+                      source={require('../images/profile.png')}
+                      style={styles.profileimg}
+                    />
+                    <View style={styles.cameraIcon}>
+                      <Ionicons name="camera" size={24} color="#ffffff" />
+                    </View>
+                  </>
+                )}
+              </View>
+            </TouchableOpacity>
           </View>
 
           {/* Form Fields */}
-          <View style={{marginBottom: 15}}>
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Name
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  onChangeText={text => {
-                    setName(text), console.log(text);
-                  }}
-                  defaultValue={playerData?.data?.name}
-                  placeholder="Enter Your Name"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                  onFocus={() => handleFieldClick('Name')}
-                />
+          <View style={styles.formContainer}>
+            {/* Name Field */}
+            <FormField
+              label="Name"
+              value={playerData?.data?.name || ''}
+              placeholder="Enter Your Name"
+              editable={false}
+              onFocus={() => handleFieldClick('Name')}
+            />
 
-                {errors.name && (
-                  <Text style={{color: 'red', marginTop: 5}}>
-                    {errors.name}
-                  </Text>
-                )}
-              </View>
-            </View>
+            {/* Email Field */}
+            <FormField
+              label="Email"
+              value={playerData?.data?.email || ''}
+              placeholder="Enter Your Email"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Email
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  onChangeText={setEmail}
-                  defaultValue={playerData?.data?.email}
-                  placeholder="Enter Your Email"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
+            {/* Mobile Field */}
+            <FormField
+              label="Mobile"
+              value={mobile ? '+91 ' + mobile : ''}
+              placeholder="Enter Your Mobile"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Mobile
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  value={'+91 ' + mobile}
-                  placeholder="Enter Your Mobile"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
-
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                DOB
-              </Text>
+            {/* DOB Field */}
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>DOB</Text>
               <View style={styles.inputContainer}>
-                <View
-                  style={{
-                    backgroundColor: '#ECECEC',
-                    paddingHorizontal: 15,
-                    width: '100%',
-                  }}>
+                <View style={styles.dateInputField}>
                   <TextInput
-                    style={[{color: '#848282'}]} // Set text color to #000000
-                    defaultValue={selectedDate}
+                    style={{ color: selectedDate ? COLORS.black : '#848282' }}
+                    value={selectedDate || ''}
                     onFocus={() => setShowDatePicker(true)}
-                    editable={false} // Make the TextInput non-editable
+                    editable={false}
                     placeholder="DOB"
                   />
                 </View>
                 <TouchableOpacity
                   style={styles.iconContainer}
-                  onPress={() => setShowDatePicker(true)}>
+                  onPress={() => playerData?.data?.dob ? null : setShowDatePicker(true)}
+                >
                   <Ionicons name="calendar-outline" size={20} color="#000000" />
                 </TouchableOpacity>
               </View>
               {showDatePicker && (
                 <DateTimePicker
                   testID="dateTimePicker"
-                  value={selectedDate ? selectedDate : new Date()}
+                  value={selectedDate ? new Date(selectedDate) : new Date()}
                   mode="date"
                   is24Hour={true}
                   display="default"
@@ -414,110 +292,52 @@ const EditProfileScreen = () => {
               )}
             </View>
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Aadhaar
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  value={
-                    playerData?.data?.aadhar &&
-                    playerData?.data?.aadhar.toString()
-                  }
-                  placeholder="Aadhaar"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
+            {/* Other non-editable fields */}
+            <FormField
+              label="Aadhaar"
+              value={playerData?.data?.aadhar?.toString() || ''}
+              placeholder="Aadhaar"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                PAN
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  value={playerData?.data?.pan}
-                  placeholder="PAN"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
+            <FormField
+              label="PAN"
+              value={playerData?.data?.pan || ''}
+              placeholder="PAN"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Bank
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  onChangeText={setBank}
-                  defaultValue={playerData?.data?.bank}
-                  placeholder="Enter Your Bank Name"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
+            <FormField
+              label="Bank"
+              value={playerData?.data?.bank || ''}
+              placeholder="Enter Your Bank Name"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Account Number
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  defaultValue={
-                    playerData?.data?.account_number &&
-                    playerData?.data?.account_number.toString()
-                  }
-                  onChangeText={setAccountNumber}
-                  placeholder="Enter Your Account Number"
-                  style={{color: COLORS.black}}
-                  keyboardType="numeric"
-                  editable={false}
-                />
+            <FormField
+              label="Account Number"
+              value={playerData?.data?.account_number?.toString() || ''}
+              placeholder="Enter Your Account Number"
+              editable={false}
+              keyboardType="numeric"
+            />
 
-                {/* {console.log(account_number)}
-                  { console.log(playerData?.data?.account_number)} */}
-              </View>
-            </View>
+            <FormField
+              label="IFSC"
+              value={playerData?.data?.ifsc || ''}
+              placeholder="Enter your IFSC Code"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                IFSC
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  defaultValue={playerData?.data?.ifsc}
-                  onChangeText={setIfsc}
-                  placeholder="Enter your IFSC Code"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
+            <FormField
+              label="Account Holder"
+              value={playerData?.data?.account_holder || ''}
+              placeholder="Enter account holder name"
+              editable={false}
+            />
 
-            <View style={{marginBottom: 15}}>
-              <Text
-                style={{color: '#000000', marginBottom: 10, fontWeight: '500'}}>
-                Account Holder
-              </Text>
-              <View style={{backgroundColor: '#ECECEC', paddingHorizontal: 15}}>
-                <TextInput
-                  defaultValue={playerData?.data?.account_holder}
-                  placeholder="Enter account holder name"
-                  style={{color: COLORS.black}}
-                  editable={false}
-                />
-              </View>
-            </View>
-
-            <View style={{marginTop: 10}}>
+            {/* Submit Button */}
+            <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.Btn} onPress={validation}>
                 <Text style={styles.primaryBtn}>Submit</Text>
                 <View style={styles.bottomBorder} />
@@ -526,43 +346,94 @@ const EditProfileScreen = () => {
           </View>
         </View>
       </ScrollView>
-      {/* <NavFooter /> */}
       <Loader visiblity={loader} />
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   ...appStyles,
+  container: { 
+    flex: 1, 
+    backgroundColor: '#ffffff' 
+  },
+  contentContainer: { 
+    padding: 20 
+  },
+  balanceCard: { 
+    backgroundColor: '#000000', 
+    padding: 20, 
+    marginBottom: 15 
+  },
+  balanceText: { 
+    color: '#ffffff', 
+    textAlign: 'center', 
+    fontWeight: '500' 
+  },
+  profileImageContainer: { 
+    marginVertical: 25,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center' 
+  },
+  uploadProfile: {
+    width: 100,
+    height: 100,
+    borderRadius: 999,
+    backgroundColor: '#ECECEC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  profileImage: { 
+    width: 100, 
+    height: 100, 
+    borderRadius: 999 
+  },
+  profileimg: {
+    width: 40,
+    height: 40,
+  },
+  cameraIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#000000',
+    borderRadius: 999,
+    padding: 5,
+  },
+  formContainer: { 
+    marginBottom: 15 
+  },
+  fieldContainer: { 
+    marginBottom: 15 
+  },
+  fieldLabel: { 
+    color: '#000000', 
+    marginBottom: 10, 
+    fontWeight: '500' 
+  },
+  inputField: { 
+    backgroundColor: '#ECECEC', 
+    paddingHorizontal: 15 
+  },
+  dateInputField: { 
+    backgroundColor: '#ECECEC', 
+    paddingHorizontal: 15, 
+    width: '100%' 
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  iconContainer: {
+    position: 'absolute',
+    right: 15,
+  },
+  buttonContainer: { 
+    marginTop: 10 
+  },
 });
+
 export default EditProfileScreen;
-
-// const submitInfo = async () => {
-//   const formData = {
-//     // image:iamge[0],
-//     name: name,
-//     email: email,
-//     dob: selectedDate,  // Ensure selectedDate is formatted correctly
-//     bank: bank,
-//     account_number: account_number,
-//     ifsc: ifsc,
-//   };
-
-//   try {
-//     console.log('Profile not updated');
-//     await editProfile.mutateAsync({ id: mobile, data: formData });
-//     console.log('Profile updated successfully');
-//   } catch (error) {
-//     if (error.response) {
-//       // Server responded with a status other than 200 range
-//       console.log('Error Response:', error.response.data);
-//     } else if (error.request) {
-//       // Request was made but no response received
-//       console.log('Error Request:', error.request);
-//     } else {
-//       // Something else happened in setting up the request
-//       console.log('Error Message:', error.message);
-//     }
-//   }
-
-//   console.log(JSON.stringify(formData));  // This will print your data in JSON format
-// };

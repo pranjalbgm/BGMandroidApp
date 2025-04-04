@@ -29,6 +29,11 @@ import analytics from '@react-native-firebase/analytics';
 import gamePostPage from './src/screens/GamePostPage';
 import GamePostPage from './src/screens/GamePostPage';
 import LoginWithMpin from './src/screens/LoginWithMpin';
+import DatewisePlayHistory from './src/screens/DatewisePlayHistory';
+import EditMpin from './src/screens/EditMpin';
+import ForgotPassword from './src/screens/ForgotPassword';
+import TipsAndTricks from './src/screens/TipsAndTricks';
+import AddNewBankPage from './src/screens/AddNewBankPage';
 
 // export const queryClient = new QueryClient();
 
@@ -107,6 +112,21 @@ const App = () => {
               options={{headerShown: false}}
             />
             <Stack.Screen
+              name="EditMpin"
+              component={EditMpin}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="AddNewBankPage"
+              component={AddNewBankPage}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="DatewisePlayHistory"
+              component={DatewisePlayHistory}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
               name="WalletAddAmountScreen"
               component={WalletAddAmountScreen}
               options={{headerShown: false}}
@@ -119,6 +139,11 @@ const App = () => {
             <Stack.Screen
               name="TermsConditionScreen"
               component={TermsConditionScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="TipsAndTricks"
+              component={TipsAndTricks}
               options={{headerShown: false}}
             />
             <Stack.Screen
@@ -159,6 +184,11 @@ const App = () => {
             <Stack.Screen
               name="MpinScreen"
               component={LoginWithMpin}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPassword}
               options={{ headerShown: false }}
             />
             <Stack.Screen

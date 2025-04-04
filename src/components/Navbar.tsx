@@ -107,16 +107,34 @@ const Navbar = ({
             onPress: () => navigation.navigate('AppDetailsScreen'),
           },
           {
-            icon: <MaterialCommunityIcons name="gamepad-circle-right" size={22} color="#023020" />,
-            title: 'My Play History',
-            subtitle: 'अपनी खेली हुई गेम देखने के लिए यहाँ दबाये।',
-            onPress: () => navigation.navigate('PlayHistoryScreen'),
+            icon: <AntDesign name="lock" size={22} color="#023020" />,
+            title: 'Change Mpin',
+            subtitle: 'यहां से अपना MPIN बदलें।',
+            onPress: () => navigation.navigate('EditMpin'),
           },
           {
-            icon: <AntDesign name="gift" size={22} color="#023020" />,
+            icon: <AntDesign name="lock" size={22} color="#023020" />,
+            title: 'Add New Bank Page',
+            subtitle: 'यहां से अपना MPIN बदलें।',
+            onPress: () => navigation.navigate('AddNewBankPage'),
+          },
+          {
+            icon: <MaterialCommunityIcons name="history" size={22} color="#023020" />,
+            title: 'My Play History',
+            subtitle: 'अपनी खेली हुई गेम देखने के लिए यहाँ दबाये।',
+            onPress: () => navigation.navigate('DatewisePlayHistory'),
+          },
+          {
+            icon: <AntDesign name="star" size={22} color="#023020" />,
             title: 'Game Post',
             subtitle: 'गेम की गैसिंग देखने के लिए यहां दबाए।',
             onPress: () => navigation.navigate('GamePostPage'),
+          },
+          {
+            icon: <AntDesign name="bulb1" size={22} color="#023020" />,
+            title: 'Tips And Tricks',
+            subtitle: 'गेम की गैसिंग देखने के लिए यहां दबाए।',
+            onPress: () => navigation.navigate('TipsAndTricks'),
           },
           {
             icon: <AntDesign name="gift" size={22} color="#023020" />,
@@ -137,13 +155,13 @@ const Navbar = ({
             onPress: () => navigation.navigate('TermsConditionScreen'),
           },
           {
-            icon: <MaterialIcons name="list-alt" size={22} color="#023020" />,
+            icon: <MaterialIcons name="share" size={22} color="#023020" />,
             title: 'Refer and Earn',
             subtitle: 'रेफर करें और स्पिन कमाएं।',
             onPress: () => setModalVisibleRefer(true),
           },
           {
-            icon: <MaterialIcons name="list-alt" size={22} color="#023020" />,
+            icon: <MaterialIcons name="rocket" size={22} color="#023020" />,
             title: 'Spin and Win',
             subtitle: 'स्पिन करें इनाम जीते।',
             onPress: () => setModalVisibleSpin(true),
@@ -213,7 +231,7 @@ const Navbar = ({
           onInstagram={() => handleSocialLink(gameSetting.data.contact_links.instagram)}
           onFacebook={() => handleSocialLink(gameSetting.data.contact_links.facebook)}
         />
-        <View style={{marginBottom: 20, marginTop: 20}}>
+        {/* <View style={{marginBottom: 20, marginTop: 20}}>
           <TouchableOpacity>
             <Text
               style={{
@@ -224,7 +242,7 @@ const Navbar = ({
               www.thebgmgame.com
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
 
       <ReferAndEarn

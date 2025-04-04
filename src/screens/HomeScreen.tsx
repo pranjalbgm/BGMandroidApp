@@ -54,6 +54,7 @@ interface Market {
   };
   latest_result?: {
     bet_key: number;
+    created_at: string
   };
 }
 
@@ -100,12 +101,30 @@ const MarketItem: React.FC<MarketItemProps> = React.memo(({ market, onPlayClick 
             { label: 'Result Time', value: ConvertTime(market.result_time) },
             { 
               label: 'Previous Time', 
-              value: market.previous_result?.bet_key.toString().padStart(2, '0') || 'xx',
+              value: market.latest_result?.created_at.slice(0, 10) ===
+                          getTodayDate()
+                            ? market.previous_result?.bet_key
+                              ? market.previous_result.bet_key
+                                  .toString()
+                                  .padStart(2, "0")
+                              : "XX"
+                            : market.latest_result?.bet_key
+                            ? market.latest_result.bet_key
+                                .toString()
+                                .padStart(2, "0")
+                            : "XX",
               style: { color: '#E26928' }
             },
             { 
               label: 'Today Result', 
-              value: market.latest_result?.bet_key.toString().padStart(2, '0') || 'xx',
+              value: market.latest_result?.created_at.slice(0, 10) ===
+              getTodayDate()
+                ? market.latest_result?.bet_key
+                  ? market.latest_result.bet_key
+                      .toString()
+                      .padStart(2, "0")
+                  : "XX"
+                : "XX",
               style: { 
                 backgroundColor: 'green', 
                 color: '#ffffff',
@@ -333,7 +352,7 @@ const HomeScreen: React.FC = () => {
           </ScrollView>
         </View>
 
-        {/* Modals */}
+        {/* Modals */} 
         <ContactModal 
           visible={modalVisibleWhatsApp}
           onClose={() => setModalVisibleWhatsApp(false)}

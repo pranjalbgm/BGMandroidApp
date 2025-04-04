@@ -17,7 +17,7 @@ const postMobileNumber = params =>
 
 const useMyPlayHistory = ({
   market = '',
-  date = '',
+  date = "2024-12-14",
   initialPage = 1,
   pageSize = 10,
 } = {}) => {
@@ -25,11 +25,15 @@ const useMyPlayHistory = ({
   const [page, setPage] = useState(initialPage);
 
   useEffect(() => {
-    if(mobile){
-
-      fetchMobile(setMobile); // Fetch mobile number if needed
-    }
-  }, [mobile]);
+    const initializeMobile = async () => {
+      const fetchedMobile = await fetchMobile(setMobile);
+      if (fetchedMobile && mobile) {
+        // playerInfo.mutate({ mobile: fetchedMobile });
+        refetch()
+      }
+    };
+    initializeMobile();
+  }, []);
 
   const params = {
     ...(market && {market}),
@@ -38,6 +42,8 @@ const useMyPlayHistory = ({
     page,
     page_size: pageSize, // Add pagination parameters
   };
+
+  console.log("params----------------------------",params)
 
   const {
     data: myPlayHistory,

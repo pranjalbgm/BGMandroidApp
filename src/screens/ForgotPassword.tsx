@@ -280,7 +280,7 @@ const ForgotPassword = () => {
                           Already have an account?{' '}
                           <Text
                             style={styles.signupLink}
-                            onPress={() => navigation.navigate('MpinScreen')}>
+                            onPress={() => navigation.navigate('MpinScreen' as never)}>
                             Login
                           </Text>
                         </Text>

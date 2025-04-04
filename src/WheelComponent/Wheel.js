@@ -23,7 +23,7 @@ const SLICES = [
 const SpinnerWheel = ({spinleft, mobileNumber}) => {
   const playerInfo = usePlayerData();
 
-  const [spinData, setSpinData] = useState(spinleft);
+  const [spinData, setSpinData] = useState(spinleft? spinleft : 0);
   const [spinWinner, setSpinWinner] = useState(0);
   const [loader, setLoader] = useState(false);
   const [mobile, setMobile] = useState(mobileNumber);

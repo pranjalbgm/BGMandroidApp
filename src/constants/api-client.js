@@ -1,21 +1,40 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { io } from "socket.io-client";
+
+
+const BASE_URL = {
+  "url": "http://192.168.1.47:3500/",
+  // "url": 'https://bgmbackend.com/'
+} 
+
+const socket = io(BASE_URL.url, {
+  withCredentials: true,
+  transports: ["websocket", "polling"],
+});
+socket.on('connect', () => {
+  console.log('Socket connected: ', socket.id);
+});
+socket.on('connect_error', (error) => {
+  console.error('Socket connection error: ', error);
+});
+export { socket };
 
 // Create axios instances
 export const NodeapiClient = axios.create({
   // baseURL: 'https://bgmbackend.com/nodejs/club',
-  baseURL: "http://192.168.1.46:3500/club",
+  baseURL: "http://192.168.1.47:3500/club",
 });
 
 const apiClient = axios.create({
   // baseURL: 'https://bgmbackend.com/club',
-  baseURL: "http:/192.168.1.46:8000/club",
+  baseURL: "http:/192.168.1.47:8000/club",
 });
 
 export const adminApiClient = axios.create({
   // baseURL: 'https://bgmbackend.com/dashboard',
-  baseURL: "http:/192.168.1.46:8000/dashboard",
+  baseURL: "http:/192.168.1.47:8000/dashboard",
 });
 
 export const adminApiClientNew = axios.create({
@@ -27,8 +46,8 @@ export const adminApiClientNew = axios.create({
 
 // Export base URLs
 // export const BaseURLCLUB = 'https://bgmbackend.com/club';
-export const BaseURLCLUB = 'http:/192.168.1.46:8000/club';
-export const BaseURLDASHBOARD = 'http:/192.168.1.46:8000/dashboard';
+export const BaseURLCLUB = 'http:/192.168.1.47:8000/club';
+export const BaseURLDASHBOARD = 'http:/192.168.1.47:8000/dashboard';
 // export const BaseURLDASHBOARD = 'https://bgmbackend.com/dashboard';
 // export const imageApiClient = 'https://bgmbackend.com/';
 export const imageApiClient = '';
