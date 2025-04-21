@@ -46,7 +46,7 @@ const useTipsAndTricks = () => {
 
   return {
     tipsAndTricks,
-    error,
+    isError:error,
     isLoading,
     refetch,
     updateCount,

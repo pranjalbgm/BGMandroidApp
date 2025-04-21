@@ -30,7 +30,6 @@ import Toast from 'react-native-simple-toast';
 import useLoginContent from '../hooks/useLoginContent';
 import { BlurView } from '@react-native-community/blur';
  
- 
 interface IUserInfo {
   mobile: string;
 }
@@ -46,6 +45,9 @@ const ForgotPassword = () => {
   const [resendAttempts, setResendAttempts] = useState(0);
   const [loader, setLoader] = useState(false);
   //---------- Input Form End ----------//
+  const [modalVisible, setModalVisible] = useState(false);
+  const postMobile = usePostMobile();
+  const verifyOTP = useVerifyOTP();
  
   useEffect(() => {
     let user;
@@ -55,13 +57,7 @@ const ForgotPassword = () => {
       //user !== null && navigation.navigate('HomeScreen')
     })()
   }, [])
- 
- 
-  //-------- Modal -------//
-  const [modalVisible, setModalVisible] = useState(false);
- 
-  //-------- End -------//
- 
+
   //-------- OTP Input -------//
   const [otp, setOtp] = useState('');
   const inputRefs = [
@@ -73,37 +69,24 @@ const ForgotPassword = () => {
     useRef<TextInput>(null),
   ];
  
-  const handleChange = (text) => {
+  const handleChange = ({text}:any) => {
     console.log(text)
     setOtp(text);
   };
  
-  const postMobile = usePostMobile();
-  const verifyOTP = useVerifyOTP();
- 
   const handleVerifyMobile = async () => {
-    // console.log("Send Otp")
- 
-    //setLoader(true)
- 
     if (!textInput1) {
       Toast.show("Please enter your mobile number.", Toast.LONG);
- 
     }
     else if (textInput1.length < 10 || textInput1.length > 10) {
       Toast.show("Please enter valid mobile number.", Toast.LONG);
     }
     else {
-      console.log("Otp  reached here")
- 
       setLoader(true)
- 
-      var params = { mobile: textInput1, refered_by: refCode }
- 
-      console.log("params data", params)
-      postMobile.mutateAsync(params);
       try {
-        if (postMobile.isSuccess) {
+        var params = { mobile: textInput1 }
+        const response = await postMobile.mutateAsync(params)
+        if (response) {
           console.log("reached till here")
           setModalVisible(true)
           setLoader(false)
@@ -121,68 +104,69 @@ const ForgotPassword = () => {
         setLoader(false)
       }
     }
- 
- 
- 
   }
  
   const handleResendOtp = () => {
     if (resendAttempts >= 3) {
       showAlert("You have exceeded the maximum number of resend attempts (3).")
-      
       return
     }
     setResendAttempts(resendAttempts + 1);
     handleVerifyMobile(); 
   };
  
- 
   const handleVerifyOtp = async () => {
- 
-    console.log(otp)
- 
     if (otp.length < 1) {
       Toast.show("Please enter your otp.", Toast.LONG);
     }
     else if (otp.length < 6) {
       Toast.show("Please enter valid otp.", Toast.LONG);
     }
-    else if (!mpin || mpin.length < 4) {
-        Toast.show('Please set a valid 4-digit MPIN.', Toast.LONG);
+    else if (!mpin || mpin.length < 6) {
+        Toast.show('Please set a valid 6-digit MPIN.', Toast.LONG);
         return;
       }
     else {
       setLoader(true)
+      try {
+        const userInfo = {
+          mobile: textInput1,
+          otp,
+          mpin:mpin,
+        };
+        const response = await verifyOTP.mutateAsync(userInfo)
+          if (response) {
+            console.log("reached till here")
+            setLoader(false)
+            storeData<IUserInfo>({ key: "user", data: { mobile: textInput1 } })
+            navigation.reset({ index: 0, routes: [{ name: 'HomeScreen' as never}] })
+          }
+          else {
+            console.log("reached till here in else", postMobile)
+            Toast.show("Something went wrong please try again.", Toast.LONG);
+            setModalVisible(false)
+            setLoader(false)
+          }
+        } catch (error) {
+          setLoader(false)
+          Toast.show("Please enter valid otp.", Toast.LONG);
+        }
+      //  console.log("userinfo data", userInfo)
+      //  const response = await verifyOTP.mutateAsync(userInfo)
+      // axios.post(BaseURLCLUB + '/player-verify-otp/', userInfo).then((response) => {
+      //   console.log("Data 111111 :- ", response)
  
-      const userInfo = {
-        mobile: textInput1,
-        otp,
-        mpinNumber:mpin,
-      };
-       console.log("userinfo data", userInfo)
+      //   setLoader(false)
+      //   storeData<IUserInfo>({ key: "user", data: { mobile: textInput1 } })
+      //   navigation.reset({ index: 0, routes: [{ name: 'HomeScreen' }] })
  
-      axios.post(BaseURLCLUB + '/player-verify-otp/', userInfo).then((response) => {
-        console.log("Data 111111 :- ", response)
- 
-        setLoader(false)
-        storeData<IUserInfo>({ key: "user", data: { mobile: textInput1 } })
-        navigation.reset({ index: 0, routes: [{ name: 'HomeScreen' }] })
- 
-      }).catch((error) => {
-        setLoader(false)
-        Toast.show("Please enter valid otp.", Toast.LONG);
-      })
+      // }).catch((error) => {
+      //   setLoader(false)
+      //   Toast.show("Please enter valid otp.", Toast.LONG);
+      // })
     }
- 
- 
- 
- 
   }
- 
- 
- 
-  //-------- End -------//
- 
+
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff', }}>
       <ImageBackground
@@ -199,8 +183,6 @@ const ForgotPassword = () => {
           flexDirection: 'row',
           alignItems: 'center',
         }}>
- 
- 
       <ScrollView>
         <View
           style={{
@@ -211,7 +193,7 @@ const ForgotPassword = () => {
           }}>
           <Image
             source={require('../images/app_ic.png')}
-            style={[styles.logoimage, { height: 140, width: 140 }]}
+            style={[ { height: 140, width: 140 }]}
           />
         </View>
  
@@ -262,9 +244,6 @@ const ForgotPassword = () => {
                 value={refCode}
               />
             )}
-            {/* {!otpSent && <Text style={styles.optional}>(Optional)</Text>} */}
- 
- 
           </View>
           
           
@@ -357,16 +336,12 @@ const ForgotPassword = () => {
                       }}>
                       Enter the otp sent to your number
                     </Text>
- 
-                   
- 
                     <OtpInputs
                       handleChange={(code) => handleChange(code)}
                       numberOfInputs={6}
                       inputContainerStyles={{ height: 50, width: 50, borderColor: COLORS.black, borderWidth: 1, alignItems: 'center', justifyContent: 'center', margin: 1, borderRadius: 10, }}
                       style={{ height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}
                       inputStyles={{ fontSize: 20, color: COLORS.black, textAlign: 'center' }}
- 
                     />
 
 <View style={{ marginBottom: 20 }}>
@@ -377,10 +352,9 @@ const ForgotPassword = () => {
                 borderColor: 'darkgreen', borderRadius:10, paddingLeft:20  }]}
               onChangeText={(text) => setMpin(text.replace(/[^0-9]/g, ''))}
               value={mpin}
-              placeholder="Set a 4-digit MPIN"
+              placeholder="Set a 6-digit MPIN"
               keyboardType="numeric"
-              maxLength={4}
-              
+              maxLength={6}
             />
           </View>
  

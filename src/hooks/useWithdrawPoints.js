@@ -1,7 +1,7 @@
 import {useMutation} from '@tanstack/react-query';
 import {useUser} from '../constants/storage';
 import apiClient from '../constants/api-client';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {fetchMobile} from './useWallet';
 
 const postMobileNumber = withdrawlPoints =>
@@ -10,7 +10,9 @@ const postMobileNumber = withdrawlPoints =>
 const useWithdrawPoints = () => {
   const [mobile, setMobile] = useState('');
 
-  fetchMobile(setMobile);
+  useEffect(()=> {
+      fetchMobile(setMobile);
+    },[])
 
   return useMutation({
     mutationKey: ['Withdraw Points'],

@@ -27,7 +27,9 @@ const fetchWalletAmount = mobile =>
 const useWallet = () => {
   const [mobile, setMobile] = useState(null);
 
-  fetchMobile(setMobile);
+  useEffect(()=> {
+    fetchMobile(setMobile);
+  },[])
   // useEffect(() => {
   //   const getUserMobile = async () => {
   //     await fetchMobile(setMobile);

@@ -49,10 +49,10 @@ const TipsAndTricks: React.FC = () => {
 
       {/* List of Tips */}
       <FlatList
-        data={tipsAndTricks?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())}
+        data={tipsAndTricks?.sort((a:any, b:any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          const totalVotes = item.option.reduce((sum, opt) => sum + opt.mobile.length, 0);
+          const totalVotes = item.option.reduce((sum:any, opt:any) => sum + opt.mobile.length, 0);
 
           return (
             <View style={styles.tipCard}>
@@ -65,7 +65,7 @@ const TipsAndTricks: React.FC = () => {
               {/* Voting Options */}
               {item.option.length > 0 && (
                 <View style={styles.optionContainer}>
-                  {item.option.map((opt, index) => {
+                  {item.option.map((opt:any, index:any) => {
                     const voteCount = opt.mobile.length;
                     const percentage = totalVotes ? Math.round((voteCount / totalVotes) * 100) : 0;
                     const isSelected = selectedOptions[item.id] === opt.title;

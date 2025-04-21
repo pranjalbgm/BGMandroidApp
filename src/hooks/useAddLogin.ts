@@ -2,16 +2,21 @@ import {useMutation} from '@tanstack/react-query';
 import { NodeapiClient } from '../constants/api-client';
 
 
+interface PostMobileParams {
+  mobile?: string;
+  email?: string;
+}
+
 interface IOtpVerify {
   mobile: string;
   otp: string;
-  mpin: number;
+  mpin: string;
 }
 export const usePostMobile = () => {
   return useMutation({
     mutationKey: ['postMobile'],
-    mutationFn: (params: {mobile: string; email?: string}) => {
-      return NodeapiClient.post('signup/', params)
+    mutationFn: ({mobile, email}: PostMobileParams) => {
+      return NodeapiClient.post('signup/', {mobile, email})
         .then(res => {
           console.log("API response:", res.data);  
           return res.data;  

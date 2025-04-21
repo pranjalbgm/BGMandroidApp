@@ -50,7 +50,7 @@ useEffect(() => {
   const [tid, setTid] = useState(0);
   const [addPointsAmount, setAddPointsAmount] = useState('');
   const [withdrawlPointsAmount, setWithdrawlPointsAmount] = useState('');
-  const [manualAccountText, setManualAccountText] = useState({
+  const [manualAccountText, setManualAccountText] = useState<any>({
     accountNumber: '',
     accountName: '',
     ifsc: '',
@@ -175,7 +175,7 @@ useEffect(() => {
       }
 
       const merchant_ids = midSettings?.filter(
-        mid => amountToAdd >= mid.min_deposit && amountToAdd <= mid.max_deposit,
+        (mid:any) => amountToAdd >= mid.min_deposit && amountToAdd <= mid.max_deposit,
       );
 
       const random = Math.floor(Math.random() * merchant_ids?.length);
@@ -244,7 +244,7 @@ useEffect(() => {
           response.data.msg || 'Failed to create payment. Please try again.',
         );
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error creating order:', error);
 
       if (error.response && error.response.data) {
@@ -256,7 +256,7 @@ useEffect(() => {
   };
   // upi gateway ends
 
-  const checkPaymentStatus = order_id => {
+  const checkPaymentStatus = (order_id:any) => {
     const formatDate = date => {
       const d = new Date(date);
       const day = String(d.getDate()).padStart(2, '0');
@@ -325,7 +325,7 @@ useEffect(() => {
           if (amount >= item.min_deposit && amount <= item.max_deposit) {
             amountInRange = true;
             if (item.gateway == 'ManualUpi') {
-              const matchingAccount = midSettings.find( midItem =>
+              const matchingAccount = midSettings.find( (midItem:any) =>
                   midItem.type == 'ManualUpi' &&
                   midItem.status == true &&
                   amount >= midItem.min_deposit &&
@@ -339,7 +339,7 @@ useEffect(() => {
               }
             } else if (item.gateway == 'ManualAccount') {
               const matchingAccount = midSettingsManualAccount.find(
-                midItem =>
+                (midItem:any) =>
                   midItem.type == 'ManualAccount' &&
                   midItem.status == true &&
                   amount >= midItem.min_deposit &&
@@ -362,7 +362,7 @@ useEffect(() => {
             } else if (item.gateway == 'UpiGateway') {
               console.log('entered till here');
               const matchingAccount = midSettingsUpiGateway.find(
-                midItem =>
+                (midItem:any) =>
                   midItem.type == 'UpiGateway' &&
                   midItem.status == true &&
                   amount >= midItem.min_deposit &&
@@ -378,7 +378,7 @@ useEffect(() => {
             } else if (item.gateway == 'ManualMerchantId') {
               console.log('landed in maerchant id', midSettingsManualMerchantAccount);
               const matchingAccount = midSettingsManualMerchantAccount?.results?.find(
-                midItem =>
+                (midItem:any) =>
                   midItem.type == 'ManualMerchantId' &&
                   midItem.status == true &&
                   amount >= midItem.min_deposit &&
@@ -410,14 +410,32 @@ useEffect(() => {
       if (!amountInRange) {
         Toast.show('Amount is out of the allowed range', Toast.LONG);
       } else if (!matchFound) {
-        Toast.show('No merchant id is found', Toast.LONG);
+        console.log("gets here",midSettingsManualMerchantAccount)
+        for (let i = 0; i < midSettingsManualMerchantAccount.results?.length; i++) {
+          const current = midSettingsManualMerchantAccount.results[i];
+      
+          console.log("Checking status:", current,addPointsAmount);
+          if (current?.status) {
+      
+            if (addPointsAmount < current.min_deposit) {
+              console.log("Below minimum amount");
+              Toast.show(`Minimum deposit is ${current.min_deposit}. कृपया ${current.min_deposit} से अधिक जमा करें।`, Toast.LONG);
+              break;
+            } else if (addPointsAmount > current.max_deposit) {
+              console.log("Above maximum amount");
+              Toast.show(`Maximum deposit is ${current.max_deposit}. कृपया ${current.max_deposit} से कम जमा करें।`, Toast.LONG);
+              break;
+            }
+          }
+        }
+        // Toast.show('No merchant id is found', Toast.LONG);
       }
     } else {
       Toast.show('Please enter point', Toast.LONG);
     }
   };
 
-  const findMatchingAccount = (accounts, amount) => {
+  const findMatchingAccount = (accounts:any, amount:any) => {
     const minDeposit = Math.min(
       ...accounts.map(account => account.min_deposit),
     );
@@ -531,7 +549,7 @@ useEffect(() => {
           Toast.show('Deposit not added ', Toast.LONG);
         }
         // Reset the form state
-      } catch (error) {
+      } catch (error:any) {
         // On error, show the error message from the backend
         console.warn('this is warning', error.error);
         const errorMessage =
@@ -948,10 +966,7 @@ useEffect(() => {
                                 </View>
                               ) : (
                                 (Array.isArray(transactions)
-                                  ? transactions.filter(
-                                      transaction =>
-                                        transaction.type === 'Credit',
-                                    )
+                                  ? transactions
                                   : []
                                 ).map((history, index) => (
                                   <View key={history.id || index}>
@@ -1377,10 +1392,7 @@ useEffect(() => {
                                 </View>
                               ) : (
                                 (Array.isArray(transactions)
-                                  ? transactions.filter(
-                                      transaction =>
-                                        transaction.type === 'Debit',
-                                    )
+                                  ? transactions
                                   : []
                                 ).map((history, index) => (
                                   <View key={history.id || index}>

@@ -1,7 +1,7 @@
 import {useMutation} from '@tanstack/react-query';
 import {getData, useUser} from '../constants/storage';
 import apiClient, { NodeapiClient } from '../constants/api-client';
-import { useState} from 'react';
+import { useEffect, useState} from 'react';
 import {fetchMobile} from './useWallet';
 
 const postBetInfo = betInfo => {
@@ -12,7 +12,9 @@ const postBetInfo = betInfo => {
 const usePlaceBet = () => {
   const [mobile, setMobile] = useState('');
 
-  fetchMobile(setMobile);
+  useEffect(()=> {
+      fetchMobile(setMobile);
+    },[])
 
   return useMutation({
     mutationKey: ['Place Bet'],

@@ -129,6 +129,20 @@ interface AppStyles {
   noDataText: TextStyle;
   addPostButton: ViewStyle;
   addPostText: TextStyle;
+  formInput: TextStyle;
+  input: TextStyle;
+  backgroundImage: ImageStyle;
+  logoimageCenter: ImageStyle;
+  footerFix: TextStyle;
+  chatFix: TextStyle;
+  table: TextStyle;
+  tableflex: TextStyle;
+  cell: TextStyle;
+  flexcell: TextStyle;
+  inputNo: TextStyle;
+  pagination: TextStyle;
+  pageInfo: TextStyle;
+  tagBtn: TextStyle;
 }
 
 const appStyles: AppStyles = {
@@ -190,11 +204,11 @@ const appStyles: AppStyles = {
     elevation: 4,
   },
 
-  backgroundImage: {
-    flex: 1,
-    ResizeMode: 'cover',
-    justifyContent: 'center',
-  },
+  // backgroundImage: {
+  //   flex: 1,
+  //   // ResizeMode: 'cover',
+  //   justifyContent: 'center',
+  // },
 
   // backgroundImage:{
   //      flex:1,
@@ -1001,7 +1015,7 @@ const appStyles: AppStyles = {
   forgotLink:{
     paddingTop: 10,
     paddingBottom: 10,
-    color:"black",
+    color:"black"
   },
 
 
@@ -1222,6 +1236,8 @@ const appStyles: AppStyles = {
   },
   replyButton: {
     marginTop: 4,
+    display:"flex",
+    flexDirection:"row"
   },
   replyText: {
     fontSize: 12,

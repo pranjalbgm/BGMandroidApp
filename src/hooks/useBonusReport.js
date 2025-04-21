@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import apiClient, {adminApiClient} from '../constants/api-client';
 import {useMutation, useQuery} from '@tanstack/react-query';
 import {fetchMobile} from './useWallet';
@@ -11,7 +11,9 @@ const fetchBonusReport = params =>
 const useBonusReport = ({market = ''} = {}) => {
   const [mobile, setMobile] = useState('');
 
-  fetchMobile(setMobile);
+  useEffect(()=> {
+      fetchMobile(setMobile);
+    },[])
 
   const params = {
     ...(market && {market}),

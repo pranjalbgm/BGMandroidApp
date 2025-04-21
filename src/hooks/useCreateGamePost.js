@@ -1,7 +1,7 @@
 import {useMutation} from '@tanstack/react-query';
 import apiClient from '../constants/api-client';
 import {fetchMobile} from './useWallet';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 // Function to make the API request
 const postMobileNumber = data =>
@@ -13,7 +13,9 @@ const postMobileNumber = data =>
 const useCreateGamePost = () => {
   const [mobile, setMobile] = useState('');
 
-  fetchMobile(setMobile);
+  useEffect(()=> {
+      fetchMobile(setMobile);
+    },[])
   return useMutation({
     mutationKey: ['Gamepost'],
     mutationFn: () => postMobileNumber(mobile), // Return the promise here,

@@ -52,9 +52,8 @@ const BonusReport: React.FC<Props> = ({navigation}) => {
   const [mobileNumber, setMobileNumber] = useState<string | null>(null);
   const [loader, setLoader] = useState<boolean>(false);
   const [isApprovedView, setIsApprovedView] = useState<boolean>(false);
-  
-
   const playerData = usePlayerData();
+  
   const { 
     bonusOn: pendingBonusData, 
     isLoading: isPendingLoading 

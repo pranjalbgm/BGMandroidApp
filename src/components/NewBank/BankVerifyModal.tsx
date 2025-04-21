@@ -13,6 +13,7 @@ import { usePlayerDataFetch } from "../../hooks/useHome";
 interface BankVerifyModalProps {
   show: boolean;
   handleClose: () => void;
+  mobileNumber:number
 }
 
 // Define Types for Form Data
@@ -33,7 +34,7 @@ interface Errors {
   ifscCode?: string;
 }
 
-const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) => {
+const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose, mobileNumber }) => {
   const [formData, setFormData] = useState<FormData>({
     bankName: "",
     accountNumber: "",
@@ -45,24 +46,10 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
   const [errors, setErrors] = useState<Errors>({});
   const [showOTPModal, setShowOTPModal] = useState<boolean>(false);
   const [otpModalData, setOtpModalData] = useState<any>(null);
-  const [mobileNumber, setMobileNumber] = useState<string | null>(null);
+  // const [mobileNumber, setMobileNumber] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const { verifyBankDetails } = useBankVerificationWithApi();
-
-  const { data: playerInfo, refetch } = usePlayerDataFetch(mobileNumber) as { data?: any; refetch: () => void };
-
-  useEffect(() => {
-    const initializeMobile = async () => {
-      const fetchedMobile = await fetchMobile(setMobileNumber);
-      if (fetchedMobile) {
-        setMobileNumber(fetchedMobile);
-        refetch(); // Ensure refetch is called when mobileNumber is available
-      }
-    };
-    initializeMobile();
-  }, [mobileNumber]);
-
-  const handleChange = (name: keyof FormData) => (value: string) => {
+  const handleChange =  (name: string,value: string) => {
     setFormData((prevFormData) => {
       let formattedValue = value;
   
@@ -71,11 +58,14 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
       }
   
       if (name === "accountHolder") {
-        formattedValue = value.replace(/[^A-Z ]/g, ""); // Only capital letters & spaces
+        formattedValue = value.replace(/[^A-Za-z ]/g, "").toUpperCase(); // Only capital letters & spaces
       }
   
       if (name === "ifscCode") {
-        formattedValue = value.toUpperCase(); // Convert to uppercase
+        formattedValue = formattedValue = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 11);
       }
   
       return { ...prevFormData, [name]: formattedValue };
@@ -150,13 +140,14 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
       <Modal isVisible={show} onBackdropPress={handleClose} style={{ margin: 0, justifyContent: "center", alignItems: "center" }}>
         <View style={{ width: "90%", backgroundColor: "white", padding: 20, borderRadius: 10 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Enter Bank Details</Text>
-          <ScrollView style={{ maxHeight: 400 }}>
+          <ScrollView style={{ maxHeight: 400 }} keyboardShouldPersistTaps="handled">
             {/* Bank Name */}
             <TextInput
               style={styles.input}
               placeholder="Enter Bank Name"
               value={formData.bankName}
               onChangeText={(value) => handleChange("bankName", value)}
+              maxLength={20}
             />
             {errors.bankName && <Text style={styles.errorText}>{errors.bankName}</Text>}
 
@@ -166,6 +157,7 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
               placeholder="Enter Account Holder Name"
               value={formData.accountHolder}
               onChangeText={(value) => handleChange("accountHolder", value)}
+              maxLength={20}
             />
             {errors.accountHolder && <Text style={styles.errorText}>{errors.accountHolder}</Text>}
 
@@ -176,6 +168,7 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
               keyboardType="numeric"
               value={formData.accountNumber}
               onChangeText={(value) => handleChange("accountNumber", value)}
+              maxLength={16}
             />
             {errors.accountNumber && <Text style={styles.errorText}>{errors.accountNumber}</Text>}
 
@@ -186,6 +179,7 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
               keyboardType="numeric"
               value={formData.reEnterAccountNumber}
               onChangeText={(value) => handleChange("reEnterAccountNumber", value)}
+              maxLength={16}
             />
             {errors.reEnterAccountNumber && <Text style={styles.errorText}>{errors.reEnterAccountNumber}</Text>}
 
@@ -196,6 +190,7 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
               value={formData.ifscCode}
               onChangeText={(value) => handleChange("ifscCode", value)}
               autoCapitalize="characters"
+              maxLength={11}
             />
             {errors.ifscCode && <Text style={styles.errorText}>{errors.ifscCode}</Text>}
           </ScrollView>
@@ -212,6 +207,15 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
           </View>
         </View>
       </Modal>
+      <OTPModal 
+      visible={showOTPModal}
+      onClose={() => setShowOTPModal(false)}
+      // onVerifySuccess={}
+      formData={formData}
+      setFormData={setFormData}
+      verifyAccountData={otpModalData}
+      // refetchPlayer={refetch}
+      />
     </>
   );
 };
@@ -219,7 +223,7 @@ const BankVerifyModal: React.FC<BankVerifyModalProps> = ({ show, handleClose }) 
 const styles = {
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#ccc",  
     padding: 10,
     marginBottom: 10,
     borderRadius: 5,

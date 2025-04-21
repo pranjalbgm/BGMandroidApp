@@ -93,7 +93,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
       setLoader(false);
       Toast.show('Point Placed Successfully.', Toast.LONG);
 
-      navigation.navigate('AllGameScreen');
+      navigation.navigate('AllGameScreen' as never);
     } else if (placeBet.isError) {
       setLoader(false);
       // showAlert("Failed!", `Could not place bet..  ${placeBet.error?.response?.data?.error || ""
@@ -109,7 +109,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
     }
   
     // Validation for consecutive digits
-    const hasConsecutiveDigits = (number) => {
+    const hasConsecutiveDigits = (number:string) => {
       for (let i = 0; i < number.length - 1; i++) {
         if (number[i] === number[i + 1]) {
           return true;
@@ -165,7 +165,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
     }
   };
 
-  const countDigits = num => {
+  const countDigits = (num : any) => {
     if (typeof num !== 'number' || isNaN(num)) {
       return 0;
     }
@@ -316,7 +316,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
 
           {crossingJodis && (
             <ScrollView style={{ marginBottom:10}}>
-              <View  >
+              <View>
                 <View
                   style={{
                     backgroundColor: '#000000',
@@ -457,7 +457,7 @@ const CrossingGame = ({navTabHomeName, market, screenType}: any) => {
                 );
 
                 setTimeout(() => {
-                  navigation.navigate('AllGameScreen');
+                  navigation.navigate('AllGameScreen' as never);
                 }, 1000); // Delay time can be adjusted as needed
                 return;
               }

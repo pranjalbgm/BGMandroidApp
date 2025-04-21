@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 
 
 const BASE_URL = {
-  "url": "http://192.168.1.47:3500/",
+  "url": "http://192.168.1.40:3500/",
   // "url": 'https://bgmbackend.com/'
 } 
 
@@ -24,17 +24,17 @@ export { socket };
 // Create axios instances
 export const NodeapiClient = axios.create({
   // baseURL: 'https://bgmbackend.com/nodejs/club',
-  baseURL: "http://192.168.1.47:3500/club",
+  baseURL: "http://192.168.1.40:3500/club",
 });
 
 const apiClient = axios.create({
   // baseURL: 'https://bgmbackend.com/club',
-  baseURL: "http:/192.168.1.47:8000/club",
+  baseURL: "http:/192.168.1.40:8000/club",
 });
 
 export const adminApiClient = axios.create({
   // baseURL: 'https://bgmbackend.com/dashboard',
-  baseURL: "http:/192.168.1.47:8000/dashboard",
+  baseURL: "http:/192.168.1.40:8000/dashboard",
 });
 
 export const adminApiClientNew = axios.create({
@@ -46,9 +46,9 @@ export const adminApiClientNew = axios.create({
 
 // Export base URLs
 // export const BaseURLCLUB = 'https://bgmbackend.com/club';
-export const BaseURLCLUB = 'http:/192.168.1.47:8000/club';
-export const BaseURLDASHBOARD = 'http:/192.168.1.47:8000/dashboard';
-// export const BaseURLDASHBOARD = 'https://bgmbackend.com/dashboard';
+export const BaseURLCLUB = 'http:/192.168.1.40:8000/club';
+// export const BaseURLDASHBOARD = 'http:/192.168.1.47:8000/dashboard';
+export const BaseURLDASHBOARD = 'https://bgmbackend.com/dashboard';
 // export const imageApiClient = 'https://bgmbackend.com/';
 export const imageApiClient = '';
 

@@ -24,7 +24,9 @@ const SpinAndEarn = ({
   visible,
   setModalVisibleSpin,
 }: {
-  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setModalVisibleSpin: React.Dispatch<React.SetStateAction<boolean>>;
+  closeModalSpin: React.Dispatch<React.SetStateAction<boolean>>;
+  visible:boolean;
 }) => {
   const [mobile, setMobile] = useState('');
   const playerInfo = usePlayerData();

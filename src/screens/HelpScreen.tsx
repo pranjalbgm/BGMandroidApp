@@ -78,7 +78,7 @@ const HelpScreen = ({navigation}: any) => {
               setModalVisibleHelp={setModalVisibleHelp}
             />
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView >
               <TouchableWithoutFeedback>
                 <View>
                   <View style={{paddingBottom: 80}}>
@@ -134,9 +134,9 @@ const HelpScreen = ({navigation}: any) => {
                                   }}
                                   // source={{ uri: imageApiClient + vid }}
                                   source={video}
-                                  onError={(error: string) =>
-                                    console.log('Video error:', error)
-                                  }
+                                  // onError={(error: string) =>
+                                  //   console.log('Video error:', error)
+                                  // }
                                 />
                               </View>
                             ),
@@ -277,6 +277,7 @@ const HelpScreen = ({navigation}: any) => {
   );
 };
 const styles = StyleSheet.create({
+  ...appStyles,
   centeredView: {
     flex: 1,
     justifyContent: 'center',

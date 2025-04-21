@@ -13,7 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 
 const ResultHistoryScreen = () => {
   const [selectedMonthValue, setSelectedMonthValue] = useState('');
-  const [selectedMonthDates, setSelectedMonthDates] = useState([]);
+  const [selectedMonthDates, setSelectedMonthDates] = useState<any>([]);
 
   // Fetch results based on selected date or fetch all if no date is selected
   const {
@@ -46,14 +46,14 @@ const ResultHistoryScreen = () => {
     };
   }
 
-  function extractMonthYear(dateString) {
+  function extractMonthYear(dateString:any) {
     const parts = dateString.split('-');
     const month = parseInt(parts[1], 10);
     const year = parseInt(parts[0], 10);
     return {month, year};
   }
 
-  function getDatesOfMonth(year, month) {
+  function getDatesOfMonth(year:any, month:any) {
     const dates = [];
     const date = new Date(year, month - 1, 1); // Subtract 1 to make the month zero-based
 
@@ -84,7 +84,7 @@ const ResultHistoryScreen = () => {
     return <Text>No results found</Text>; // Display message when no results are found
   }
 
-  const groupedResults = result?.reduce((acc, res) => {
+  const groupedResults = result?.reduce((acc:any, res:any) => {
     const date = format(new Date(res.created_at), 'yyyy-MM-dd');
     if (!acc[date]) {
       acc[date] = {};
@@ -122,21 +122,21 @@ const ResultHistoryScreen = () => {
           <View>
             <View style={{backgroundColor: '#E1EFE6', flexDirection: 'row'}}>
               <Text style={styles.headerCell}>Date</Text>
-              {markets?.map((market, index) => (
+              {markets?.map((market:any, index:number) => (
                 <Text key={index} style={styles.headerCell}>
                   {market.market}
                 </Text>
               ))}
             </View>
             {selectedMonthDates.length > 0
-              ? selectedMonthDates.map(date => (
+              ? selectedMonthDates.map((date:any) => (
                   <View key={date.toString()} style={styles.resultRow}>
                     <Text style={styles.dateCell}>
                       {format(date, 'yyyy-MM-dd')}
                     </Text>
-                    {markets?.map(market => {
+                    {markets?.map((market:any) => {
                       const marketResult = result?.find(
-                        res =>
+                        (res:any) =>
                           res.market_name === market.market &&
                           format(new Date(res.created_at), 'yyyy-MM-dd') ===
                             format(date, 'yyyy-MM-dd'),
@@ -149,7 +149,17 @@ const ResultHistoryScreen = () => {
                     })}
                   </View>
                 ))
-              : Object.entries(groupedResults).map(([date, marketResults]) => (
+              : Object.entries(groupedResults).map((date:any, marketResults:any) => (
+                  <View key={date} style={styles.resultRow}>
+                    <Text style={styles.dateCell}>{date}</Text>
+                    {markets?.map((market:any) => (
+                      <Text key={market.id} style={styles.resultCell}>
+                        {marketResults[market.market] || '-'}
+                      </Text>
+                    ))}
+                  </View>
+                ))}
+                {/* Object.entries(groupedResults).map(([date, marketResults]) => (
                   <View key={date} style={styles.resultRow}>
                     <Text style={styles.dateCell}>{date}</Text>
                     {markets?.map(market => (
@@ -158,7 +168,7 @@ const ResultHistoryScreen = () => {
                       </Text>
                     ))}
                   </View>
-                ))}
+                ))} */}
           </View>
         </ScrollView>
         <TouchableOpacity

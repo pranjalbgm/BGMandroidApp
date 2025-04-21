@@ -25,9 +25,9 @@ const SplashScreen = () => {
         // user !== null ? navigation.navigate('HomeScreen') : navigation.navigate('LoginScreen')
 
         if (user != null) {
-          navigation.reset({index: 0, routes: [{name: 'HomeScreen'}]});
+          navigation.reset({index: 0, routes: [{name: 'HomeScreen' as never}]});
         } else {
-          navigation.reset({index: 0, routes: [{name: 'LoginScreen'}]});
+          navigation.reset({index: 0, routes: [{name: 'LoginScreen'} as never]});
         }
       })();
     }, 1500);
@@ -53,7 +53,7 @@ const SplashScreen = () => {
           }}>
           <Image
             source={require('../images/app_ic.png')}
-            style={[styles.logoimage, {height: 140, width: 140}]}
+            style={[ {height: 140, width: 140}]}
           />
         </View>
         <View

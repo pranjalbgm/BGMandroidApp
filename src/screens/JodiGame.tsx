@@ -59,7 +59,7 @@ const JodiGame = ({navTabHomeName, market, apiData, screenType}: any) => {
       setLoader(false);
       Toast.show('Point Placed Successfully.', Toast.LONG);
 
-      navigation.navigate('AllGameScreen');
+      navigation.navigate('AllGameScreen' as never);
     } else if (placeBet.isError) {
       setLoader(false);
       showAlert('Failed!', 'Could not place bet...');
@@ -101,13 +101,13 @@ const JodiGame = ({navTabHomeName, market, apiData, screenType}: any) => {
       }
     } else {
       if (existingIndex !== -1) {
-        updatedJodis[existingIndex] = {
+        updatedJodis[existingIndex] = ({
           betKey: betKey,
           points,
           betType,
           jodiType,
           market,
-        };
+        });
       } else {
         updatedJodis.push({
           betKey: betKey,
@@ -122,7 +122,7 @@ const JodiGame = ({navTabHomeName, market, apiData, screenType}: any) => {
     apiData(updatedJodis);
   };
 
-  const countDigits = num => {
+  const countDigits = (num : any) => {
     if (typeof num !== 'number' || isNaN(num)) {
       return 0;
     }

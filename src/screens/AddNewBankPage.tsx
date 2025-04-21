@@ -16,8 +16,10 @@ const AddNewBankPage = () => {
   const { data: newBankVerify } = useNewBankVerify(mobileNumber) as { data?: any[] };
   const { data: playerInfo } = usePlayerDataFetch(mobileNumber) as { data?: any };
    const {refetch} = usePlayerDataFetch(mobileNumber);
+   const handleClose = () => setShowModal(false);
+   const prevStatuses = useRef<Record<string, string>>({});
 
-  console.log("------------------------->>newBankVerify",newBankVerify?.results)
+  console.log("------------------------->>mobile from add new bank page",mobileNumber)
 
    useEffect(() => {
     const initializeMobile = async () => {
@@ -40,9 +42,7 @@ const AddNewBankPage = () => {
     }
   };
 
-  const handleClose = () => setShowModal(false);
-
-  const prevStatuses = useRef<Record<string, string>>({});
+ 
 
   useEffect(() => {
     if (Array.isArray(newBankVerify) && newBankVerify?.results.length > 0) {
@@ -122,8 +122,11 @@ const AddNewBankPage = () => {
       {/* Bank Verification Modal */}
       <Modal visible={showModal} animationType="slide" transparent>
         <View style={styles.modalContainer}>
-          <BankVerifyModal show={showModal} handleClose={handleClose} />
-          {/* <Button title="Close" onPress={handleClose} /> */}
+          <BankVerifyModal 
+           show={showModal} 
+           handleClose={handleClose}
+           mobileNumber={mobileNumber}
+    />
         </View>
       </Modal>
 
@@ -138,7 +141,7 @@ const styles = {
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
     marginBottom: 5,
   },
   input: {
@@ -171,7 +174,7 @@ const styles = {
     marginTop: 20
   },
   button: {
-    flex: 1,
+    display:"flex",
     backgroundColor: "green",
     padding: 12,
     borderRadius: 5,

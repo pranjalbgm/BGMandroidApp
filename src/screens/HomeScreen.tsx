@@ -28,7 +28,7 @@ import ContactModal from '../components/HomepageComponent/ContactModal';
 
 // Hook Imports
 import useMarkets from '../hooks/useMarkets';
-import useHome, { usePlayerData, usePlayerDataFetch } from '../hooks/useHome';
+import useHome, {  usePlayerDataFetch } from '../hooks/useHome';
 import useLatestResult from '../hooks/useLatestResult';
 import useWallet, { fetchMobile } from '../hooks/useWallet';
 

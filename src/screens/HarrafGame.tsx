@@ -102,7 +102,7 @@ const HarrafGame = ({navTabHomeName, market, apiData, screenType}: any) => {
     apiData(allBets());
   }, [andarNumbers, baharNumbers]);
 
-  const countDigits = num => {
+  const countDigits = (num : any) => {
     if (typeof num !== 'number' || isNaN(num)) {
       return 0;
     }

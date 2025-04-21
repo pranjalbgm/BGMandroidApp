@@ -30,6 +30,7 @@ import WithdrawDepositChatSocket from '../Sockets/WithdrawDepositChatSocket';
 import { fetchMobile } from '../hooks/useWallet';
 import { usePlayerDataFetch } from '../hooks/useHome';
 import HeaderThree from '../components/HeaderThree';
+import appStyles from '../styles/appStyles';
 
 const audioRecorderPlayer = new AudioRecorderPlayer();
 
@@ -64,15 +65,15 @@ const ChatScreen = () => {
   const playerInfo = usePlayerDataFetch();
   const {refetch} = usePlayerDataFetch();
   const { control, handleSubmit, reset } = useForm();
-  const [audioFile, setAudioFile] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileType, setFileType] = useState(null); // Track the file type
-  const [microphonePermission, setMicrophonePermission] = useState(false);
+  const [audioFile, setAudioFile] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [fileType, setFileType] = useState<any>(null); // Track the file type
+  const [microphonePermission, setMicrophonePermission] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [playerData, setPlayerData] = useState(null);
-  const [messagesData, setMessagesData] = useState([]);
+  const [playerData, setPlayerData] = useState<any>(null);
+  const [messagesData, setMessagesData] = useState<any>([]);
   const [initialScrollComplete, setInitialScrollComplete] = useState(false);
-  const [imageLoadErrors, setImageLoadErrors] = useState({});
+  const [imageLoadErrors, setImageLoadErrors] = useState<any>({});
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   
@@ -135,7 +136,7 @@ const ChatScreen = () => {
   }, [messagesData]);
 
   // Debug function to check image URLs
-  const debugImageUrl = (url, messageId) => {
+  const debugImageUrl = (url:any, messageId:any) => {
     if (!url || typeof url !== 'string' || !url.startsWith('http')) return;
     
     console.log(`Checking image URL for message ${messageId}:`, url);
@@ -208,12 +209,12 @@ const ChatScreen = () => {
     }
   };
 
-  const getFileExtension = (uri) => {
+  const getFileExtension = (uri:any) => {
     if (!uri) return '';
     return uri.split('.').pop().toLowerCase();
   };
 
-  const getFileTypeFromUri = (uri) => {
+  const getFileTypeFromUri = (uri:any) => {
     const extension = getFileExtension(uri);
     
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -229,7 +230,7 @@ const ChatScreen = () => {
     return 'unknown';
   };
 
-  const fileToBase64 = async (uri) => {
+  const fileToBase64 = async (uri:any) => {
     try {
       // Handle content:// or file:// URIs properly
       let fileUri = uri;
@@ -331,7 +332,7 @@ const ChatScreen = () => {
     setFileType(null);
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data:any) => {
     if (!data.text && !audioFile && !selectedFile) {
       showToast('Please enter a message, select an image, or record an audio.');
       return;
@@ -416,7 +417,7 @@ const ChatScreen = () => {
     };
     
     // Add the message to local state first for immediate feedback
-    setMessagesData(prev => [...prev, localMessageData]);
+    setMessagesData((prev:any) => [...prev, localMessageData]);
     
     // Then send via socket
     sendMessage(messageData);
@@ -430,7 +431,7 @@ const ChatScreen = () => {
     scrollToBottom();
   };
 
-  const renderTextWithLinks = (text) => {
+  const renderTextWithLinks = (text:string) => {
     if (!text) return null;
 
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -438,7 +439,7 @@ const ChatScreen = () => {
 
     return (
       <Text>
-        {parts.map((part, index) => {
+        {parts.map((part:any, index:number) => {
           if (part.match(urlRegex)) {
             return (
               <Text
@@ -456,7 +457,7 @@ const ChatScreen = () => {
     );
   };
 
-  const renderFileContent = (message) => {
+  const renderFileContent = (message:any) => {
     // Generate a unique ID for this message
     const messageId = message?.id || `msg-${message?.created_at}`;
     
@@ -507,36 +508,36 @@ const ChatScreen = () => {
         // Check if this image previously had a load error
         if (imageLoadErrors[messageId]) {
           return (
-            <View style={styles.imageErrorContainer}>
+            <View >
               <MaterialIcons name="broken-image" size={50} color="#E74C3C" />
-              <Text style={styles.imageErrorText}>Image failed to load</Text>
+              <Text >Image failed to load</Text>
               <TouchableOpacity
-                style={styles.openLinkButton}
+                
                 onPress={() => Linking.openURL(message.file)}
               >
-                <Text style={styles.openLinkText}>Open in Browser</Text>
+                <Text>Open in Browser</Text>
               </TouchableOpacity>
             </View>
           );
         }
         
         return (
-          <View style={styles.imageContainer}>
+          <View>
             <Image
               source={{ uri: message.file }}
-              style={styles.attachmentImage}
+              style={styles.attachmentImage}   
               resizeMode="contain"
               onError={(e) => {
                 console.error("Image loading error:", e.nativeEvent.error);
                 // Mark this image as having an error
-                setImageLoadErrors(prev => ({...prev, [messageId]: true}));
+                setImageLoadErrors((prev:any) => ({...prev, [messageId]: true}));
               }}
             />
             <TouchableOpacity
-              style={styles.imageOpenButton}
+           
               onPress={() => Linking.openURL(message.file)}
             >
-              <Text style={styles.imageOpenText}>Open Image</Text>
+              <Text>Open Image</Text>
             </TouchableOpacity>
           </View>
         );
@@ -546,7 +547,7 @@ const ChatScreen = () => {
       if ((isDataUri && message.file.startsWith('data:video')) ||
           (isHttpUrl && /\.(mp4|mov|webm)$/i.test(message.file))) {
         return (
-          <View style={styles.videoContainer}>
+          <View >
             <Video
               source={{ uri: message.file }}
               style={styles.videoAttachment}
@@ -555,10 +556,10 @@ const ChatScreen = () => {
               onError={(e) => console.error("Video loading error:", e)}
             />
             <TouchableOpacity
-              style={styles.videoOpenButton}
+           
               onPress={() => Linking.openURL(message.file)}
             >
-              <Text style={styles.videoOpenText}>Open Video</Text>
+              <Text >Open Video</Text>
             </TouchableOpacity>
           </View>
         );
@@ -584,7 +585,7 @@ const ChatScreen = () => {
       // Generic fallback for other file types with URLs
       if (isHttpUrl) {
         return (
-          <View style={styles.genericFileContainer}>
+          <View >
             <MaterialIcons name="insert-drive-file" size={40} color="#3498DB" />
             <TouchableOpacity
               style={styles.downloadButton}
@@ -601,11 +602,11 @@ const ChatScreen = () => {
     return null;
   };
   
-  const renderAudioPlayer = (audioUri, isLocal = false) => {
+  const renderAudioPlayer = (audioUri:any, isLocal = false) => {
     console.log("Audio URI type:", typeof audioUri);
     console.log("Audio URI preview:", audioUri ? audioUri.substring(0, 50) + "..." : "null");
     
-    const playAudio = async (uri) => {
+    const playAudio = async (uri:any) => {
       try {
         console.log("Playing audio from:", isLocal ? "local file" : "remote URL");
         
@@ -623,7 +624,7 @@ const ChatScreen = () => {
             audioRecorderPlayer.removePlayBackListener();
           }
         });
-      } catch (error) {
+      } catch (error:any) {
         console.error('Error playing audio:', error);
         showToast('Error playing audio: ' + error.message);
       }
@@ -640,7 +641,7 @@ const ChatScreen = () => {
     );
   };
   
-  const renderMessageItem = ({ item: message }) => (
+  const renderMessageItem = ({ item: message } :any) => (
     <View
       style={[
         styles.messageContainer,
@@ -694,7 +695,7 @@ const ChatScreen = () => {
         data={messagesData}
         windowSize={21}
         renderItem={renderMessageItem}
-        keyExtractor={(item, index) => `msg-${index}-${item?.id || item?.created_at || Date.now()}`}
+        keyExtractor={(item:any, index:number) => `msg-${index}-${item?.id || item?.created_at || Date.now()}`}
         onContentSizeChange={() => {
           console.log("FlatList content size changed");
           if (!initialScrollComplete && messagesData.length > 0) {
@@ -781,6 +782,7 @@ const ChatScreen = () => {
   );
 };
 const styles = StyleSheet.create({
+  ...appStyles,
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

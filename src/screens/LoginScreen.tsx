@@ -127,7 +127,7 @@ const LoginScreen = () => {
       } else {
         Toast.show("Something went wrong. Please try again.", Toast.LONG);
       }
-    } catch (error) {
+    } catch ({error} : any) {
       
       console.log("error -",error?.response?.data?.message)
       showAlert("Failed!", `${error?.response?.data?.message} \nPlease try again later!`);
@@ -175,7 +175,7 @@ const LoginScreen = () => {
       
       navigation.reset({ 
         index: 0, 
-        routes: [{ name: 'HomeScreen' }] 
+        routes: [{ name: 'HomeScreen' as never}] 
       });
     } catch (error) {
       Toast.show("Invalid OTP. Please try again.", Toast.LONG);
@@ -290,7 +290,7 @@ const LoginScreen = () => {
                 Already have an account?{' '}
                 <Text
                   style={styles.signupLink}
-                  onPress={() => navigation.navigate('MpinScreen')}
+                  onPress={() => navigation.navigate('MpinScreen' as never)}
                 >
                   Login
                 </Text>
@@ -374,7 +374,7 @@ const LoginScreen = () => {
                     paddingLeft: 20,
                     marginBottom: 20,
                   }}
-                  onChangeText={(text) => setMpin(text.replace(/[^0-9]/g, ''))}
+                  onChangeText={(text) => setMpin(text.replace(/[^0-9][^a-z][^A-Z]/g, ''))}
                   value={mpin}
                   placeholder="Set a 6-digit MPIN"
                   keyboardType="numeric"

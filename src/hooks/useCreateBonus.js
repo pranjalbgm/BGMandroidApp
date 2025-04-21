@@ -1,5 +1,4 @@
 import {useMutation} from '@tanstack/react-query';
-import {useUser} from '../constants/storage';
 import apiClient from '../constants/api-client';
 
 const postMobileNumber = withdrawlBonus =>

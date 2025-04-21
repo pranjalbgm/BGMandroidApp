@@ -96,7 +96,7 @@ const MoringStarScreen: React.FC<MoringStarScreenProps> = ({ navigation, route }
         isNaN(invalidBet.points)
           ? 'All bets must have valid numeric points.'
           : invalidBet.points < market.minimum
-          ? `Minimum bet is ${market.minimum}.`
+          ? screenType === 'Tab3'? `Minimum bet is ${market.minimum * 10}.` : `Minimum bet is ${market.minimum}.`
           : `Maximum bet is ${market.maximum}.`,
         Toast.LONG
       );

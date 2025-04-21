@@ -20,6 +20,13 @@ const GamePostFormModal = ({
   onSubmit,
   playerData,
   markets,
+}: {
+  gameSubmitChat: any
+  showModal: boolean;
+  handleClose: any;
+  onSubmit: []
+  playerData: any
+  markets: any
 }) => {
   const [formData, setFormData] = useState({
     market: "",
@@ -40,13 +47,13 @@ const GamePostFormModal = ({
   const [showFromPicker, setShowFromPicker] = useState(false);
 const [showToPicker, setShowToPicker] = useState(false);
 
-  const handleNumberChange = (name, value) => {
+  const handleNumberChange = (name :string, value: any) => {
     if (/^\d{0,2}$/.test(value)) {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleTrickChange = (index, value) => {
+  const handleTrickChange = (index : number, value: any) => {
     const allowedChars = /^[0-9+\-*/%()=:a-zA-Z]*$/;
     if (!allowedChars.test(value)) return;
 
@@ -65,7 +72,7 @@ const [showToPicker, setShowToPicker] = useState(false);
     }));
   };
 
-  const removeTrickRow = (index) => {
+  const removeTrickRow = ({index} : any) => {
     const updatedTricks = [...formData.tricks];
     updatedTricks.splice(index, 1);
     setFormData((prev) => ({ ...prev, tricks: updatedTricks }));
@@ -89,7 +96,7 @@ const [showToPicker, setShowToPicker] = useState(false);
   };
 
 
-const handleFromDateChange = (event, selectedDate) => {
+const handleFromDateChange = (event:any, selectedDate :any) => {
   setShowFromPicker(false);
   if (selectedDate) {
     const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
@@ -97,7 +104,7 @@ const handleFromDateChange = (event, selectedDate) => {
   }
 };
 
-const handleToDateChange = (event, selectedDate) => {
+const handleToDateChange = (event:any, selectedDate :any) => {
   setShowToPicker(false);
   if (selectedDate) {
     const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
@@ -106,7 +113,7 @@ const handleToDateChange = (event, selectedDate) => {
 };
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e:any) => {
     e.preventDefault();
 
     if (!formData.market) return Toast.show("Please select a market!", Toast.LONG);

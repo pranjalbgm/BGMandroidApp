@@ -1,6 +1,6 @@
 import {useMutation, useQuery} from '@tanstack/react-query';
 import apiClient from '../constants/api-client';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {fetchMobile} from './useWallet';
 
 // const postMobileNumber = (data) =>
@@ -30,8 +30,9 @@ const postMobileNumber = async data => {
 
 const useAddPoints = () => {
   const [mobile, setMobile] = useState('');
-
-  fetchMobile(setMobile);
+  useEffect(()=> {
+    fetchMobile(setMobile);
+  },[])
 
   return useMutation({
     mutationKey: ['AddPoints'],

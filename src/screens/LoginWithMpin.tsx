@@ -16,10 +16,11 @@ import Loader from '../components/Loader';
 import COLORS from '../components/COLORS';
 import apiClient, { NodeapiClient } from '../constants/api-client';
 import appStyles from '../styles/appStyles';
+import { useLogin } from '../hooks/useLogin';
 
 const LoginWithMpin = () => {
   const navigation = useNavigation();
-
+  const {login} = useLogin()
   //---------- Input Form ----------//
   const [mobile, setMobile] = useState('');
   const [mpin, setMpin] = useState('');
@@ -45,34 +46,31 @@ const LoginWithMpin = () => {
       Toast.show('Please enter a valid 6-digit MPIN.', Toast.LONG);
       return;
     }
-
+    
     setLoader(true);
+    console.log("reached here-----------")
+    // const params = { mobile:mobile, mpin: mpin };
+    // const result = await login(mobile, mpin);
 
-    const params = { mobile:mobile, mpin: mpin };
-try{
-    NodeapiClient.post('/login', params)
-    .then( (response) => {
-     
-      if (response?.status === 200) {
-        storeData({ key: 'user', data: { mobile } });
-        const tokenvalue = response?.data?.jwt_token 
-        console.log("get till here -----------------", tokenvalue);
-        storeData({ key: 'token', data: { tokenvalue } });
-        navigation.reset({ index: 0, routes: [{ name: 'HomeScreen' }] });
+    try {
+      const result = await login(mobile, mpin);
+      console.log("Result:", result);
+    
+      if (result.success) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'HomeScreen' as never }],
+        });
+        // Toast.show(result.message, Toast.LONG);
       } else {
-        Toast.show(response?.data?.message || 'Invalid credentials.', Toast.LONG);
+        Toast.show(result.message, Toast.LONG);
       }
-    })
-    .catch((error) => {
-      Toast.show('Login failed. Please try again later.', Toast.LONG);
-      console.error('Login Error:', error);
-    })
-    .finally(() => {
+    } catch (err) {
+      console.error("Unexpected error in login:", err);
+    } finally {
       setLoader(false);
-    });
-  } catch {
-    Toast.show('Login failed. Please try again later.', Toast.LONG);
-  }
+    }
+    
 }
 
   return (
@@ -144,15 +142,15 @@ try{
               />
             </View>
             
-          {/* <View style={styles.forgotLink}>
+          <View style={styles.forgotLink}>
                       <Text style={styles.signupText}>
                                     <Text
                                       style={styles.signupLink}
-                                      onPress={() => navigation.navigate('ForgotPassword')}>
+                                      onPress={() => navigation.navigate('ForgotPassword' as never)}>
                                       Forgot Password
                                     </Text>
                                   </Text>
-          </View> */}
+          </View>
 
             <TouchableOpacity onPress={handleLogin} style={styles.primaryBtnContainer}>
               <Text style={styles.primaryBtn}>Login</Text>
@@ -162,7 +160,7 @@ try{
               Don't have an account?{' '}
               <Text
                 style={styles.signupLink}
-                onPress={() => navigation.navigate('LoginScreen')}>
+                onPress={() => navigation.navigate('LoginScreen' as never)}>
                 Sign Up
               </Text>
             </Text>

@@ -11,6 +11,7 @@ import {
   TextInput,
   Button,
   FlatList,
+  Platform,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -64,7 +65,7 @@ const PlayHistoryScreen = () => {
   const [loader, setLoader] = useState(false);
   const [hasEffectBeenCalled, setHasEffectBeenCalled] = useState(false);
   //---------- Date  Dropdown  End----------//
-  const [betsToDelete, setBetsToDelete] = useState({bets: []});
+  const [betsToDelete, setBetsToDelete] = useState<any>({bets: []});
   const {markets} = useMarkets();
   // const { myPlayHistory = [], isLoading, refetch , error} = useMyPlayHistory({
   //   market,
@@ -120,7 +121,7 @@ const PlayHistoryScreen = () => {
     );
   }, [selectedDate]);
 
-  const handleDateChange = (event, selectedDate) => {
+  const handleDateChange = (event:any, selectedDate:any) => {
     const currentDate = selectedDate || new Date();
     setShowDatePicker(Platform.OS === 'ios');
     setSelectedDate(currentDate);
@@ -389,7 +390,7 @@ const PlayHistoryScreen = () => {
                   <TouchableOpacity
                     onPress={async () => {
                       if (isDeletable(history.createdAt)) {
-                        setBetsToDelete(prevBets => ({
+                        setBetsToDelete((prevBets:any) => ({
                           ...prevBets,
                           bets: [
                             ...prevBets.bets,

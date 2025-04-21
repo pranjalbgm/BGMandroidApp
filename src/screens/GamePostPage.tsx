@@ -29,6 +29,9 @@ import appStyles from "../styles/appStyles";
 import { TextInput } from "react-native-gesture-handler";
 import EmojiPickerModal from "../components/EmojiPickerModal";
 import useMarkets from "../hooks/useMarkets";
+import useFetchPinnedMsgs from "../hooks/useFetchPinnedMsgs";
+import useAddPinMsg from "../hooks/useAddPinMsg";
+import Toast from 'react-native-simple-toast';
 
 type RootStackParamList = {
   GamePosting: { marketName: string };
@@ -82,7 +85,6 @@ const GamePosting: React.FC = () => {
     gameSubmitChat,
     messages,
     gamePinnedChat,
-    pinnedMessage,
     refetchmessage,
   }: {
     gameSubmitChat: (msg: Message) => void;
@@ -106,6 +108,9 @@ const GamePosting: React.FC = () => {
   const [gamePostFormOpen, setGamePostFormOpen] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [replyingMessageId, setReplyingMessageId] = useState<string | null>(null);
+  const pinned = useFetchPinnedMsgs();
+  const pinnedMessage = pinned?.data?.[0];
+  const addpinMsg = useAddPinMsg();
 
 
   const [showEmojiInput, setShowEmojiInput] = useState(false);
@@ -113,6 +118,13 @@ const emojiInputRef = useRef<TextInput>(null);
 const [emojiText, setEmojiText] = useState("");
 const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
 const [loading, setLoading] = useState(true);
+const {
+  data: playerInfo,
+  error,
+  isLoading: isPlayerDataLoading,
+  refetch: refetchPlayer,
+  isSuccess: isPlayerDataSuccess,
+} = usePlayerDataFetch(mobile);
 
 
 const openEmojiKeyboard = (messageId: string) => {
@@ -130,17 +142,11 @@ const handleEmojiInputChange = (text: string) => {
     setShowEmojiInput(false);
     setActiveMessageId(null);
   } else {
-    setEmojiText(text); // still updating to clear the input
+    setEmojiText(text);
   }
 };
 
-  const {
-    data: playerInfo,
-    error,
-    isLoading: isPlayerDataLoading,
-    refetch: refetchPlayer,
-    isSuccess: isPlayerDataSuccess,
-  } = usePlayerDataFetch(mobile);
+
 
   // Initialize message refs
   useEffect(() => {
@@ -197,14 +203,23 @@ const handleEmojiInputChange = (text: string) => {
     setReplyingMessageId(replyingMessageId === messageId ? null : messageId);
   };
 
-  const handlePinnedMsg = (message: Message) => {
+  const handlePinnedMsg = (message) => {
     if (playerInfo?.kyc === "no") {
-      // Toast.show({
-      //   type: 'error',
-      //   text1: 'Please complete Your KYC first',
-      // });
+      Toast.show("Please Complete Your KYC First", Toast.LONG);
     } else {
-      gamePinnedChat(message);
+      const username = playerInfo?.name;
+      addpinMsg.mutate(
+        { message, username },
+        {
+          onSuccess: () => {
+            pinned.refetch();
+            Toast.show("Pinned Msg Successfully", Toast.LONG);
+          },
+          onError: (error) => {
+            console.error("Error pinning message:", error);
+          },
+        }
+      );
     }
   };
 
@@ -226,11 +241,22 @@ const handleEmojiInputChange = (text: string) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (fetchMobile) {
-  //     refetchPlayer();
-  //   }
-  // }, [fetchMobile]);
+  const calculateTotalReactions = (message) => {
+    if (!message.customReactions) return 0;
+
+    let total = 0;
+    if (message.customReactions.congratulations) {
+      total += message.customReactions.congratulations.count;
+    }
+    if (message.customReactions.nice) {
+      total += message.customReactions.nice.count;
+    }
+    if (message.customReactions.good) {
+      total += message.customReactions.good.count;
+    }
+
+    return total;
+  };
 
   useEffect(() => {
     if (mobile) {
@@ -248,7 +274,6 @@ const handleEmojiInputChange = (text: string) => {
     const initializeMobile = async () => {
       const fetchedMobile = await fetchMobile(setMobile);
       if (fetchedMobile && mobile) {
-        // playerInfo.mutate({ mobile: fetchedMobile });
         refetchPlayer()
       }
     };
@@ -262,7 +287,6 @@ const handleEmojiInputChange = (text: string) => {
   
   const renderEmojis = (messageId: string) => {
     const predefinedEmojis = ["😂", "❤️", "👍", "🔥", "😢"];
-    
     return (
       <View style={styles.emojiWrapper}>
         <View style={styles.predefinedEmojis}>
@@ -276,18 +300,18 @@ const handleEmojiInputChange = (text: string) => {
             </TouchableOpacity>
           ))}
   
-  <TouchableOpacity
+  {/* <TouchableOpacity
   style={styles.emojiPickerIcon}
   onPress={() => setShowEmojiPicker(true)}
 >
   <MaterialCommunityIcons name="plus" size={18} color="black" />
-</TouchableOpacity>
+</TouchableOpacity> */}
 </View>
-<EmojiPickerModal
+{/* <EmojiPickerModal
   visible={showEmojiPicker}
   onClose={() => setShowEmojiPicker(false)}
   onSelect={(emoji) => handleEmojiClick(messageId, emoji)}
-/>
+/> */}
       </View>
       
     );
@@ -303,7 +327,7 @@ const handleEmojiInputChange = (text: string) => {
           <View style={styles.boxInnerContainer}>
             <View style={styles.pinnedMessageHeader}>
               <View style={styles.postHost}>
-                <Text style={styles.pinnedByText}>Pinned by - {pinnedMessage.username}</Text>
+                {/* <Text style={styles.pinnedByText}>Pinned by - {pinnedMessage.username}</Text> */}
                 <Text style={styles.postByText}>
                   Post by - <Text>{pinnedMessage.message.name}</Text>
                 </Text>
@@ -508,6 +532,10 @@ const handleEmojiInputChange = (text: string) => {
           onPress={() => handleClick(message._id)}
         >
           <Text style={styles.replyText}>reply</Text>
+          {calculateTotalReactions(message) > 0 && (
+          <Text style={styles.replyTextTotalSub}> 
+              {calculateTotalReactions(message)}      
+          </Text>)}
         </TouchableOpacity>
         {renderReplyOptions(message)}
       </View>
@@ -661,6 +689,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  replyTextTotalSub:{
+    marginLeft:5,
+  }
  
 });
 

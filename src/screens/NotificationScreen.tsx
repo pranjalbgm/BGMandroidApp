@@ -60,7 +60,7 @@ const NotificationScreen = () => {
         // Show notifications if available
         <ScrollView>
           <View style={{marginVertical: 20}}>
-            {notifications?.map(notification => (
+            {notifications?.map((notification:any) => (
               <View
                 key={notification.id}
                 style={{

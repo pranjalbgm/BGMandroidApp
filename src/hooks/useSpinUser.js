@@ -2,7 +2,7 @@ import {useQuery} from '@tanstack/react-query';
 import {adminApiClient} from '../constants/api-client';
 import {useUser} from '../constants/storage';
 import {fetchMobile} from './useWallet';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 const fetchSpinUser = params =>
   adminApiClient.get('player-refered-list/', {params}).then(res => res.data);
@@ -10,7 +10,9 @@ const fetchSpinUser = params =>
 const useSpinUser = () => {
   const [mobile, setMobile] = useState('');
 
-  fetchMobile(setMobile);
+ useEffect(()=> {
+     fetchMobile(setMobile);
+   },[])
 
   const params = {
     mobile,

@@ -140,7 +140,7 @@ const EditMpin: React.FC<SetMpinProps> = ({ navigation }) => {
               message: 'MPIN has been successfully set!',
             });
             refetch();
-            setTimeout(() => navigation.navigate('HomeScreen'), 2000);
+            setTimeout(() => navigation.navigate('HomeScreen' as never), 2000);
           },
           onError: () => {
             setModal({
